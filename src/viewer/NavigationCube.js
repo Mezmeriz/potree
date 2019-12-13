@@ -13,7 +13,7 @@ export class NavigationCube extends THREE.Object3D {
 				side: THREE.DoubleSide
 			});
 			new THREE.TextureLoader().load(
-				exports.resourcePath + '/textures/navigation/' + img,
+				resourcePath + '/textures/navigation/' + img,
 				function(texture) {
 					texture.anisotropy = viewer.renderer.capabilities.getMaxAnisotropy();
 					material.map = texture;

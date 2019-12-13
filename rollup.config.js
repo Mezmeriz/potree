@@ -4,7 +4,7 @@ export default [
 		treeshake: false,
 		output: {
 			file: 'build/potree/potree.js',
-			format: 'umd',
+			format: 'es',
 			name: 'Potree',
 			sourcemap: true,
 		}
