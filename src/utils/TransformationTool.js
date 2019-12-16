@@ -1,6 +1,6 @@
 
 
-import {Utils} from "../utils.js";
+import {Utils, resourcePath} from "../utils.js";
 
 export class TransformationTool {
 	constructor(viewer) {

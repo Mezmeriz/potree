@@ -1,6 +1,10 @@
 
 import {ClipTask, ClipMethod} from "./defines";
 import {Box3Helper} from "./utils/Box3Helper";
+import BinaryHeap from '../libs/other/BinaryHeap';
+import {maxNodesLoading, lru} from './Potree';
+
+let pointCloudTransformVersion = new Map();
 
 export function updatePointClouds(pointclouds, camera, renderer){
 
@@ -99,7 +103,7 @@ export function updateVisibilityStructures(pointclouds, camera, renderer) {
 };
 
 
-export function updateVisibility(pointclouds, camera, renderer){
+export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 
 	let numVisibleNodes = 0;
 	let numVisiblePoints = 0;
@@ -125,10 +129,7 @@ export function updateVisibility(pointclouds, camera, renderer){
 
 	// check if pointcloud has been transformed
 	// some code will only be executed if changes have been detected
-	if(!Potree._pointcloudTransformVersion){
-		Potree._pointcloudTransformVersion = new Map();
-	}
-	let pointcloudTransformVersion = Potree._pointcloudTransformVersion;
+
 	for(let pointcloud of pointclouds){
 
 		if(!pointcloud.visible){
@@ -175,7 +176,7 @@ export function updateVisibility(pointclouds, camera, renderer){
 		let maxLevel = pointcloud.maxLevel || Infinity;
 		let level = node.getLevel();
 		let visible = insideFrustum;
-		visible = visible && !(numVisiblePoints + node.getNumPoints() > Potree.pointBudget);
+		visible = visible && !(numVisiblePoints + node.getNumPoints() > pointBudget);
 		visible = visible && !(numVisiblePointsInPointclouds.get(pointcloud) + node.getNumPoints() > pointcloud.pointBudget);
 		visible = visible && level < maxLevel;
 		//visible = visible && node.name !== "r613";
@@ -278,7 +279,7 @@ export function updateVisibility(pointclouds, camera, renderer){
 			lowestSpacing = Math.min(lowestSpacing, node.geometryNode.spacing);
 		}
 
-		if (numVisiblePoints + node.getNumPoints() > Potree.pointBudget) {
+		if (numVisiblePoints + node.getNumPoints() > pointBudget) {
 			break;
 		}
 
@@ -386,17 +387,17 @@ export function updateVisibility(pointclouds, camera, renderer){
 		}
 	}// end priority queue loop
 
-	{ // update DEM
-		let maxDEMLevel = 4;
-		let candidates = pointclouds
-			.filter(p => (p.generateDEM && p.dem instanceof Potree.DEM));
-		for (let pointcloud of candidates) {
-			let updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= maxDEMLevel);
-			pointcloud.dem.update(updatingNodes);
-		}
-	}
+	// { // update DEM
+	// 	let maxDEMLevel = 4;
+	// 	let candidates = pointclouds
+	// 		.filter(p => (p.generateDEM && p.dem instanceof Potree.DEM));
+	// 	for (let pointcloud of candidates) {
+	// 		let updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= maxDEMLevel);
+	// 		pointcloud.dem.update(updatingNodes);
+	// 	}
+	// }
 
-	for (let i = 0; i < Math.min(Potree.maxNodesLoading, unloadedGeometry.length); i++) {
+	for (let i = 0; i < Math.min(maxNodesLoading, unloadedGeometry.length); i++) {
 		unloadedGeometry[i].load();
 	}
 

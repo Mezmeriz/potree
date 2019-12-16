@@ -30,7 +30,8 @@ import {DeviceOrientationControls} from "../navigation/DeviceOrientationControls
 import { EventDispatcher } from "../EventDispatcher.js";
 import { ClassificationScheme } from "../materials/ClassificationScheme.js";
 
-
+import {updatePointClouds} from '../Potree_update_visibility';
+import {debug, lru, scriptPath} from '../Potree';
 
 export class Viewer extends EventDispatcher{
 	
@@ -52,31 +53,31 @@ export class Viewer extends EventDispatcher{
 		$(domElement).append(this.elMessages);
 		
 		try{
-
-		{ // generate missing dom hierarchy
-			if ($(domElement).find('#potree_map').length === 0) {
-				let potreeMap = $(`
-					<div id="potree_map" class="mapBox" style="position: absolute; left: 50px; top: 50px; width: 400px; height: 400px; display: none">
-						<div id="potree_map_header" style="position: absolute; width: 100%; height: 25px; top: 0px; background-color: rgba(0,0,0,0.5); z-index: 1000; border-top-left-radius: 3px; border-top-right-radius: 3px;">
-						</div>
-						<div id="potree_map_content" class="map" style="position: absolute; z-index: 100; top: 25px; width: 100%; height: calc(100% - 25px); border: 2px solid rgba(0,0,0,0.5); box-sizing: border-box;"></div>
-					</div>
-				`);
-				$(domElement).append(potreeMap);
-			}
-
-			if ($(domElement).find('#potree_description').length === 0) {
-				let potreeDescription = $(`<div id="potree_description" class="potree_info_text"></div>`);
-				$(domElement).append(potreeDescription);
-			}
-
-			if ($(domElement).find('#potree_annotations').length === 0) {
-				let potreeAnnotationContainer = $(`
-					<div id="potree_annotation_container" 
-						style="position: absolute; z-index: 100000; width: 100%; height: 100%; pointer-events: none;"></div>`);
-				$(domElement).append(potreeAnnotationContainer);
-			}
-		}
+		//
+		// { // generate missing dom hierarchy
+		// 	if ($(domElement).find('#potree_map').length === 0) {
+		// 		let potreeMap = $(`
+		// 			<div id="potree_map" class="mapBox" style="position: absolute; left: 50px; top: 50px; width: 400px; height: 400px; display: none">
+		// 				<div id="potree_map_header" style="position: absolute; width: 100%; height: 25px; top: 0px; background-color: rgba(0,0,0,0.5); z-index: 1000; border-top-left-radius: 3px; border-top-right-radius: 3px;">
+		// 				</div>
+		// 				<div id="potree_map_content" class="map" style="position: absolute; z-index: 100; top: 25px; width: 100%; height: calc(100% - 25px); border: 2px solid rgba(0,0,0,0.5); box-sizing: border-box;"></div>
+		// 			</div>
+		// 		`);
+		// 		$(domElement).append(potreeMap);
+		// 	}
+		//
+		// 	if ($(domElement).find('#potree_description').length === 0) {
+		// 		let potreeDescription = $(`<div id="potree_description" class="potree_info_text"></div>`);
+		// 		$(domElement).append(potreeDescription);
+		// 	}
+		//
+		// 	if ($(domElement).find('#potree_annotations').length === 0) {
+		// 		let potreeAnnotationContainer = $(`
+		// 			<div id="potree_annotation_container"
+		// 				style="position: absolute; z-index: 100000; width: 100%; height: 100%; pointer-events: none;"></div>`);
+		// 		$(domElement).append(potreeAnnotationContainer);
+		// 	}
+		// }
 
 		this.pointCloudLoadedCallback = args.onPointCloudLoaded || function () {};
 
@@ -136,10 +137,11 @@ export class Viewer extends EventDispatcher{
 		this.skybox = null;
 		this.clock = new THREE.Clock();
 		this.background = null;
+		this.pointBudget = 1 * 1000 * 1000;
 
 		this.initThree();
-		this.prepareVR();
-		this.initDragAndDrop();
+		// this.prepareVR();
+		// this.initDragAndDrop();
 
 		if(typeof Stats !== "undefined"){
 			this.stats = new Stats();
@@ -497,14 +499,14 @@ export class Viewer extends EventDispatcher{
 	}
 
 	setPointBudget (value) {
-		if (Potree.pointBudget !== value) {
-			Potree.pointBudget = parseInt(value);
+		if (this.pointBudget !== value) {
+			this.pointBudget = parseInt(value);
 			this.dispatchEvent({'type': 'point_budget_changed', 'viewer': this});
 		}
 	};
 
 	getPointBudget () {
-		return Potree.pointBudget;
+		return this.pointBudget;
 	};
 
 	setShowAnnotations (value) {
@@ -770,7 +772,7 @@ export class Viewer extends EventDispatcher{
 	};
 
 	moveToGpsTimeVicinity(time){
-		const result = Potree.Utils.findClosestGpsTime(time, viewer);
+		const result = Utils.findClosestGpsTime(time, viewer);
 
 		const box  = result.node.pointcloud.deepestNodeAt(result.position).getBoundingBox();
 		const diameter = box.min.distanceTo(box.max);
@@ -915,23 +917,23 @@ export class Viewer extends EventDispatcher{
 		}
 	}
 
-	async loadProject(url){
-
-		const response = await fetch(url);
-	
-		const json = await response.json();
-		// const json = JSON.parse(text);
-
-		if(json.type === "Potree"){
-			Potree.loadProject(viewer, json);
-		}
-
-		Potree.loadProject(this, url);
-	}
-
-	saveProject(){
-		return Potree.saveProject(this);
-	}
+	// async loadProject(url){
+	//
+	// 	const response = await fetch(url);
+	//
+	// 	const json = await response.json();
+	// 	// const json = JSON.parse(text);
+	//
+	// 	if(json.type === "Potree"){
+	// 		Potree.loadProject(viewer, json);
+	// 	}
+	//
+	// 	Potree.loadProject(this, url);
+	// }
+	//
+	// saveProject(){
+	// 	return Potree.saveProject(this);
+	// }
 	
 	loadSettingsFromURL(){
 		if(Utils.getParameterByName("pointSize")){
@@ -1111,17 +1113,17 @@ export class Viewer extends EventDispatcher{
 
 		let viewer = this;
 		let sidebarContainer = $('#potree_sidebar_container');
-		sidebarContainer.load(new URL(Potree.scriptPath + '/sidebar.html').href, () => {
+		sidebarContainer.load(new URL(scriptPath + '/sidebar.html').href, () => {
 			sidebarContainer.css('width', '300px');
 			sidebarContainer.css('height', '100%');
 
 			let imgMenuToggle = document.createElement('img');
-			imgMenuToggle.src = new URL(Potree.resourcePath + '/icons/menu_button.svg').href;
+			imgMenuToggle.src = new URL(resourcePath + '/icons/menu_button.svg').href;
 			imgMenuToggle.onclick = this.toggleSidebar;
 			imgMenuToggle.classList.add('potree_menu_toggle');
 
 			let imgMapToggle = document.createElement('img');
-			imgMapToggle.src = new URL(Potree.resourcePath + '/icons/map_icon.png').href;
+			imgMapToggle.src = new URL(resourcePath + '/icons/map_icon.png').href;
 			imgMapToggle.style.display = 'none';
 			imgMapToggle.onclick = e => { this.toggleMap(); };
 			imgMapToggle.id = 'potree_map_toggle';
@@ -1134,7 +1136,7 @@ export class Viewer extends EventDispatcher{
 
 			i18n.init({
 				lng: 'en',
-				resGetPath: Potree.resourcePath + '/lang/__lng__/__ns__.json',
+				resGetPath: resourcePath + '/lang/__lng__/__ns__.json',
 				preload: ['en', 'fr', 'de', 'jp', 'se'],
 				getAsync: true,
 				debug: false
@@ -1154,7 +1156,7 @@ export class Viewer extends EventDispatcher{
 				//	$(callback);
 				//}
 
-				let elProfile = $('<div>').load(new URL(Potree.scriptPath + '/profile.html').href, () => {
+				let elProfile = $('<div>').load(new URL(scriptPath + '/profile.html').href, () => {
 					$(document.body).append(elProfile.children());
 					this.profileWindow = new ProfileWindow(this);
 					this.profileWindowController = new ProfileWindowController(this);
@@ -1194,73 +1196,73 @@ export class Viewer extends EventDispatcher{
 		this.server = server;
 	}
 
-	initDragAndDrop(){
-		function allowDrag(e) {
-			e.dataTransfer.dropEffect = 'copy';
-			e.preventDefault();
-		}
-
-		async function dropHandler(event){
-			console.log(event);
-			event.preventDefault();
-
-			for(const item of event.dataTransfer.items){
-				console.log(item);
-
-				if(item.kind !== "file"){
-					continue;
-				}
-
-				const file = item.getAsFile();
-
-				const isJson = file.name.toLowerCase().endsWith(".json");
-				const isGeoPackage = file.name.toLowerCase().endsWith(".gpkg");
-
-				if(isJson){
-					try{
-
-						const text = await file.text();
-						const json = JSON.parse(text);
-
-						if(json.type === "Potree"){
-							Potree.loadProject(viewer, json);
-						}
-					}catch(e){
-						console.error("failed to parse the dropped file as JSON");
-						console.error(e);
-					}
-				}else if(isGeoPackage){
-					const hasPointcloud = viewer.scene.pointclouds.length > 0;
-
-					if(!hasPointcloud){
-						let msg = "At least one point cloud is needed that specifies the ";
-						msg += "coordinate reference system before loading vector data.";
-						console.error(msg);
-					}else{
-
-						proj4.defs("WGS84", "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
-						proj4.defs("pointcloud", this.getProjection());
-						let transform = proj4("WGS84", "pointcloud");
-
-						const buffer = await file.arrayBuffer();
-
-						const params = {
-							transform: transform,
-							source: file.name,
-						};
-						
-						const geo = await Potree.GeoPackageLoader.loadBuffer(buffer, params);
-						viewer.scene.addGeopackage(geo);
-					}
-				}
-				
-			}
-			
-		}
-		$("body")[0].addEventListener("dragenter", allowDrag);
-		$("body")[0].addEventListener("dragover", allowDrag);
-		$("body")[0].addEventListener("drop", dropHandler);
-	}
+	// initDragAndDrop(){
+	// 	function allowDrag(e) {
+	// 		e.dataTransfer.dropEffect = 'copy';
+	// 		e.preventDefault();
+	// 	}
+	//
+	// 	async function dropHandler(event){
+	// 		console.log(event);
+	// 		event.preventDefault();
+	//
+	// 		for(const item of event.dataTransfer.items){
+	// 			console.log(item);
+	//
+	// 			if(item.kind !== "file"){
+	// 				continue;
+	// 			}
+	//
+	// 			const file = item.getAsFile();
+	//
+	// 			const isJson = file.name.toLowerCase().endsWith(".json");
+	// 			const isGeoPackage = file.name.toLowerCase().endsWith(".gpkg");
+	//
+	// 			if(isJson){
+	// 				try{
+	//
+	// 					const text = await file.text();
+	// 					const json = JSON.parse(text);
+	//
+	// 					if(json.type === "Potree"){
+	// 						Potree.loadProject(viewer, json);
+	// 					}
+	// 				}catch(e){
+	// 					console.error("failed to parse the dropped file as JSON");
+	// 					console.error(e);
+	// 				}
+	// 			}else if(isGeoPackage){
+	// 				const hasPointcloud = viewer.scene.pointclouds.length > 0;
+	//
+	// 				if(!hasPointcloud){
+	// 					let msg = "At least one point cloud is needed that specifies the ";
+	// 					msg += "coordinate reference system before loading vector data.";
+	// 					console.error(msg);
+	// 				}else{
+	//
+	// 					proj4.defs("WGS84", "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+	// 					proj4.defs("pointcloud", this.getProjection());
+	// 					let transform = proj4("WGS84", "pointcloud");
+	//
+	// 					const buffer = await file.arrayBuffer();
+	//
+	// 					const params = {
+	// 						transform: transform,
+	// 						source: file.name,
+	// 					};
+	//
+	// 					const geo = await Potree.GeoPackageLoader.loadBuffer(buffer, params);
+	// 					viewer.scene.addGeopackage(geo);
+	// 				}
+	// 			}
+	//
+	// 		}
+	//
+	// 	}
+	// 	$("body")[0].addEventListener("dragenter", allowDrag);
+	// 	$("body")[0].addEventListener("dragover", allowDrag);
+	// 	$("body")[0].addEventListener("drop", dropHandler);
+	// }
 
 	initThree () {
 
@@ -1514,14 +1516,14 @@ export class Viewer extends EventDispatcher{
 
 	update(delta, timestamp){
 
-		if(Potree.measureTimings) performance.mark("update-start");
+		if(debug.measureTimings) performance.mark("update-start");
 
 		
 		const scene = this.scene;
 		const camera = scene.getActiveCamera();
 		const visiblePointClouds = this.scene.pointclouds.filter(pc => pc.visible)
-		
-		Potree.pointLoadLimit = Potree.pointBudget * 2;
+
+		lru.setPointLoadLimit(this.pointBudget * 2);
 
 		const lTarget = camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1000));
 		this.scene.directionalLight.position.copy(camera.position);
@@ -1569,7 +1571,7 @@ export class Viewer extends EventDispatcher{
 		}
 
 		if (!this.freeze) {
-			let result = Potree.updatePointClouds(scene.pointclouds, camera, this.renderer);
+			let result = updatePointClouds(scene.pointclouds, camera, this.renderer);
 
 
 			// DEBUG - ONLY DISPLAY NODES THAT INTERSECT MOUSE
@@ -1776,14 +1778,14 @@ export class Viewer extends EventDispatcher{
 			delta: delta,
 			timestamp: timestamp});
 			
-		if(Potree.measureTimings) {
+		if(debug.measureTimings) {
 			performance.mark("update-end");
 			performance.measure("update", "update-start", "update-end");
 		}
 	}
 	
 	render(){
-		if(Potree.measureTimings) performance.mark("render-start");
+		if(debug.measureTimings) performance.mark("render-start");
 
 		try{
 
@@ -1973,14 +1975,14 @@ export class Viewer extends EventDispatcher{
 			this.onCrash(e);
 		}
 		
-		if(Potree.measureTimings){
+		if(debug.measureTimings){
 			performance.mark("render-end");
 			performance.measure("render", "render-start", "render-end");
 		}
 	}
 
 	resolveTimings(timestamp){
-		if(Potree.measureTimings){
+		if(debug.measureTimings){
 			if(!this.toggle){
 				this.toggle = timestamp;
 			}
@@ -2012,22 +2014,6 @@ export class Viewer extends EventDispatcher{
 					group.n++;
 					group.min = Math.min(group.min, measure.duration);
 					group.max = Math.max(group.max, measure.duration);
-				}
-
-				let glQueries = Potree.resolveQueries(this.renderer.getContext());
-				for(let [key, value] of glQueries){
-
-					let group = {
-						measures: value.map(v => {return {duration: v}}),
-						sum: value.reduce( (a, i) => a + i, 0),
-						n: value.length,
-						min: Math.min(...value),
-						max: Math.max(...value)
-					};
-
-					let groupname = `[tq] ${key}`;
-					groups.set(groupname, group);
-					names.add(groupname);
 				}
 				
 				for(let [name, group] of groups){
@@ -2123,7 +2109,7 @@ export class Viewer extends EventDispatcher{
 		}
 
 		let queryAll;
-		if(Potree.measureTimings){
+		if(debug.measureTimings){
 			performance.mark("loop-start");
 		}
 
@@ -2151,14 +2137,14 @@ export class Viewer extends EventDispatcher{
 		}
 
 
-		if(Potree.measureTimings){
+		if(debug.measureTimings){
 			performance.mark("loop-end");
 			performance.measure("loop", "loop-start", "loop-end");
 		}
 		
 		this.resolveTimings(timestamp);
 
-		Potree.framenumber++;
+		// Potree.framenumber++;
 
 		if(this.stats){
 			this.stats.end();

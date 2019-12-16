@@ -25,6 +25,11 @@ class LRU{
 		this.items = {};
 		this.elements = 0;
 		this.numPoints = 0;
+		this.pointLoadLimit = 0;
+	}
+
+	setPointLoadLimit(limit){
+		this.pointLoadLimit = limit;
 	}
 
 	size(){
@@ -140,7 +145,7 @@ class LRU{
 			return;
 		}
 
-		while (this.numPoints > Potree.pointLoadLimit) {
+		while (this.numPoints > this.pointLoadLimit) {
 			let element = this.first;
 			let node = element.node;
 			this.disposeDescendants(node);

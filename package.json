@@ -10,6 +10,9 @@
     "gulp-util": "^3.0.8",
     "through": "~2.3.4"
   },
+  "devDependencies": {
+    "@tweenjs/tween.js": "^17.4.0"
+  },
   "author": "Markus Schütz",
   "license": "BSD-2-CLAUSE"
 }

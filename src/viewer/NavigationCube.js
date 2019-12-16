@@ -1,3 +1,4 @@
+import { resourcePath } from '../utils.js';
 
 export class NavigationCube extends THREE.Object3D {
 
