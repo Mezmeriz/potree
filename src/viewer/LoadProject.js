@@ -7,6 +7,9 @@ import {OrientedImageLoader} from '../modules/OrientedImages/OrientedImages.js';
 import {Utils} from "../utils.js";
 import {Profile} from '../utils/Profile.js';
 import {GeoPackageLoader} from '../loader/GeoPackageLoader.js';
+import {EptLoader} from "../loader/EptLoader";
+import {PointCloudOctree} from "../PointCloudOctree";
+import {POCLoader} from "../loader/POCLoader";
 
 
 function loadPointCloud(viewer, data){
@@ -21,7 +24,7 @@ function loadPointCloud(viewer, data){
 			return;
 		}
 
-		Potree.loadPointCloud(data.url, data.name, (e) => {
+		this.loadPointCloudData(data.url, data.name, (e) => {
 			const {pointcloud} = e;
 
 			pointcloud.position.set(...data.position);
@@ -35,6 +38,51 @@ function loadPointCloud(viewer, data){
 	});
 
 	return promise;
+}
+
+export function loadPointCloudData(path, name, callback){
+	let loaded = function(pointcloud){
+		pointcloud.name = name;
+		callback({type: 'pointcloud_loaded', pointcloud: pointcloud});
+	};
+
+	// load pointcloud
+	if (!path){
+		// TODO: callback? comment? Hello? Bueller? Anyone?
+	} else if (path.indexOf('ept.json') > 0) {
+		EptLoader.load(path, function(geometry) {
+			if (!geometry) {
+				console.error(new Error(`failed to load point cloud from URL: ${path}`));
+			}
+			else {
+				let pointcloud = new PointCloudOctree(geometry);
+				loaded(pointcloud);
+			}
+		});
+	} else if (path.indexOf('cloud.js') > 0) {
+		POCLoader.load(path, function (geometry) {
+			if (!geometry) {
+				//callback({type: 'loading_failed'});
+				console.error(new Error(`failed to load point cloud from URL: ${path}`));
+			} else {
+				let pointcloud = new PointCloudOctree(geometry);
+				loaded(pointcloud);
+			}
+		});
+	} else if (path.indexOf('.vpc') > 0) {
+		PointCloudArena4DGeometry.load(path, function (geometry) {
+			if (!geometry) {
+				//callback({type: 'loading_failed'});
+				console.error(new Error(`failed to load point cloud from URL: ${path}`));
+			} else {
+				let pointcloud = new PointCloudArena4D(geometry);
+				loaded(pointcloud);
+			}
+		});
+	} else {
+		//callback({'type': 'loading_failed'});
+		console.error(new Error(`failed to load point cloud from URL: ${path}`));
+	}
 }
 
 function loadMeasurement(viewer, data){

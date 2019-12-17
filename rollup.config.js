@@ -1,6 +1,6 @@
 export default [
 	{
-		input: 'src/Potree.js',
+		input: 'src/RollupExport.js',
 		treeshake: false,
 		output: {
 			file: 'build/potree/potree.js',

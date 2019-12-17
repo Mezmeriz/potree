@@ -1,6 +1,8 @@
 
 import {TextSprite} from "../TextSprite.js";
-import {Utils} from "../utils.js";
+import {Mouse} from './Mouse.js';
+import {Display} from './Display.js';
+import {Calc} from './Calc.js';
 
 function createHeightLine(){
 	let lineGeometry = new THREE.LineGeometry();
@@ -411,7 +413,7 @@ export class Measure extends THREE.Object3D {
 
 		{ // Event Listeners
 			let drag = (e) => {
-				let I = Utils.getMousePointCloudIntersection(
+				let I = Mouse.getMousePointCloudIntersection(
 					e.drag.end, 
 					e.viewer.scene.getActiveCamera(), 
 					e.viewer, 
@@ -599,7 +601,7 @@ export class Measure extends THREE.Object3D {
 			{ // coordinate labels
 				let coordinateLabel = this.coordinateLabels[0];
 				
-				let msg = position.toArray().map(p => Utils.addCommas(p.toFixed(2))).join(" / ");
+				let msg = position.toArray().map(p => Display.addCommas(p.toFixed(2))).join(" / ");
 				coordinateLabel.setText(msg);
 
 				coordinateLabel.visible = this.showCoordinates;
@@ -670,7 +672,7 @@ export class Measure extends THREE.Object3D {
 					suffix = this.lengthUnitDisplay.code;
 				}
 
-				let txtLength = Utils.addCommas(distance.toFixed(2));
+				let txtLength = Display.addCommas(distance.toFixed(2));
 				edgeLabel.setText(`${txtLength} ${suffix}`);
 				edgeLabel.visible = this.showDistances && (index < lastIndex || this.closed) && this.points.length >= 2 && distance > 0;
 			}
@@ -689,7 +691,7 @@ export class Measure extends THREE.Object3D {
 				let labelPos = point.position.clone().add(dir.multiplyScalar(dist));
 				angleLabel.position.copy(labelPos);
 
-				let msg = Utils.addCommas((angle * (180.0 / Math.PI)).toFixed(1)) + '\u00B0';
+				let msg = Display.addCommas((angle * (180.0 / Math.PI)).toFixed(1)) + '\u00B0';
 				angleLabel.setText(msg);
 
 				angleLabel.visible = this.showAngles && (index < lastIndex || this.closed) && this.points.length >= 3 && angle > 0;
@@ -739,7 +741,7 @@ export class Measure extends THREE.Object3D {
 					suffix = this.lengthUnitDisplay.code;
 				}
 
-				let txtHeight = Utils.addCommas(height.toFixed(2));
+				let txtHeight = Display.addCommas(height.toFixed(2));
 				let msg = `${txtHeight} ${suffix}`;
 				this.heightLabel.setText(msg);
 			}
@@ -767,7 +769,7 @@ export class Measure extends THREE.Object3D {
 				const AC = C.clone().sub(A);
 				const N = AC.clone().cross(AB).normalize();
 
-				const center = Utils.computeCircleCenter(A, B, C);
+				const center = Calc.computeCircleCenter(A, B, C);
 				const radius = center.distanceTo(A);
 
 
@@ -811,7 +813,7 @@ export class Measure extends THREE.Object3D {
 				suffix = this.lengthUnitDisplay.code;
 			}
 
-			let txtArea = Utils.addCommas(area.toFixed(1));
+			let txtArea = Display.addCommas(area.toFixed(1));
 			let msg =  `${txtArea} ${suffix}\u00B2`;
 			this.areaLabel.setText(msg);
 		}

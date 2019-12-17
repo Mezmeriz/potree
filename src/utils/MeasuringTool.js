@@ -1,6 +1,6 @@
 
 import {Measure} from "./Measure.js";
-import {Utils} from "../utils.js";
+import {Calc} from './Calc.js';
 import {CameraMode} from "../defines.js";
 import { EventDispatcher } from "../EventDispatcher.js";
 import {debug} from '../Potree.js';
@@ -24,7 +24,7 @@ function updateAzimuth(viewer, measure){
 	
 	const [p0, p1] = measure.points;
 	const r = p0.position.distanceTo(p1.position);
-	const northVec = Utils.getNorthVec(p0.position, r, viewer.getProjection());
+	const northVec = Calc.getNorthVec(p0.position, r, viewer.getProjection());
 	const northPos = p0.position.clone().add(northVec);
 
 	azimuth.center.position.copy(p0.position);
@@ -78,7 +78,7 @@ function updateAzimuth(viewer, measure){
 	azimuth.centerToNorth.material.resolution.set(width, height);
 
 	// label
-	const radians = Utils.computeAzimuth(p0.position, p1.position, viewer.getProjection());
+	const radians = Calc.computeAzimuth(p0.position, p1.position, viewer.getProjection());
 	let degrees = THREE.Math.radToDeg(radians);
 	if(degrees < 0){
 		degrees = 360 + degrees;
@@ -94,7 +94,7 @@ function updateAzimuth(viewer, measure){
 	}
 	azimuth.label.setText(txtDegrees);
 	let distance = azimuth.label.position.distanceTo(camera.position);
-	let pr = Utils.projectedRadius(1, camera, distance, width, height);
+	let pr = Calc.projectedRadius(1, camera, distance, width, height);
 	let scale = (70 / pr);
 	azimuth.label.scale.set(scale, scale, scale);
 }
@@ -243,7 +243,7 @@ export class MeasuringTool extends EventDispatcher{
 			// spheres
 			for(let sphere of measure.spheres){
 				let distance = camera.position.distanceTo(sphere.getWorldPosition(new THREE.Vector3()));
-				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 				let scale = (15 / pr);
 				sphere.scale.set(scale, scale, scale);
 			}
@@ -252,7 +252,7 @@ export class MeasuringTool extends EventDispatcher{
 			let labels = measure.edgeLabels.concat(measure.angleLabels);
 			for(let label of labels){
 				let distance = camera.position.distanceTo(label.getWorldPosition(new THREE.Vector3()));
-				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 				let scale = (70 / pr);
 
 				if(debug.scale){
@@ -287,7 +287,7 @@ export class MeasuringTool extends EventDispatcher{
 
 				}
 				label.position.copy(labelPos);
-				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 				let scale = (70 / pr);
 				label.scale.set(scale, scale, scale);
 			}
@@ -298,7 +298,7 @@ export class MeasuringTool extends EventDispatcher{
 
 				{
 					let distance = label.position.distanceTo(camera.position);
-					let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+					let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 					let scale = (70 / pr);
 					label.scale.set(scale, scale, scale);
 				}
@@ -346,7 +346,7 @@ export class MeasuringTool extends EventDispatcher{
 			{ // area label
 				let label = measure.areaLabel;
 				let distance = label.position.distanceTo(camera.position);
-				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 
 				let scale = (70 / pr);
 				label.scale.set(scale, scale, scale);
@@ -355,7 +355,7 @@ export class MeasuringTool extends EventDispatcher{
 			{ // radius label
 				let label = measure.circleRadiusLabel;
 				let distance = label.position.distanceTo(camera.position);
-				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 
 				let scale = (70 / pr);
 				label.scale.set(scale, scale, scale);

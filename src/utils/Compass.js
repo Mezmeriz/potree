@@ -1,7 +1,7 @@
 
 import {resourcePath} from "../Potree.js";
 import {Utils} from '../utils.js';
-
+import {Calc} from './Calc.js';
 
 export class Compass{
 
@@ -22,7 +22,7 @@ export class Compass{
 			const p2 = p1.clone().add(direction);
 
 			const projection = viewer.getProjection();
-			const azimuth = Utils.computeAzimuth(p1, p2, projection);
+			const azimuth = Calc.computeAzimuth(p1, p2, projection);
 			
 			this.dom.css("transform", `rotateZ(${-azimuth}rad)`);
 		});

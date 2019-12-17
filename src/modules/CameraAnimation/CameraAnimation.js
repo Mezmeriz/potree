@@ -1,6 +1,6 @@
 
 import { EventDispatcher } from "../../EventDispatcher.js";
-import { Utils } from "../../utils.js";
+import {Calc} from '../../utils/Calc.js';
 
 class ControlPoint{
 
@@ -67,7 +67,7 @@ export class CameraAnimation extends EventDispatcher{
 		const r = camera.position.distanceTo(target) * 0.3;
 
 		//const dir = target.clone().sub(camera.position).normalize();
-		const angle = Utils.computeAzimuth(camera.position, target);
+		const angle = Calc.computeAzimuth(camera.position, target);
 
 		const n = 5;
 		for(let i = 0; i < n; i++){
