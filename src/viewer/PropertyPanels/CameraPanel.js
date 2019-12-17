@@ -1,5 +1,6 @@
 
 import {Utils} from "../../utils.js";
+import {resourcePath} from '../../Potree.js';
 
 export class CameraPanel{
 	constructor(viewer, propertiesPanel){
@@ -8,7 +9,7 @@ export class CameraPanel{
 
 		this._update = () => { this.update(); };
 
-		let copyIconPath = Potree.resourcePath + '/icons/copy.svg';
+		let copyIconPath = resourcePath + '/icons/copy.svg';
 		this.elContent = $(`
 		<div class="propertypanel_content">
 			<table>

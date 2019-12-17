@@ -2,6 +2,7 @@
 
 import {Version} from "../Version.js";
 import {XHRFactory} from "../XHRFactory.js";
+import {nodes, workerPool, scriptPath} from '../Potree.js';
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -124,8 +125,8 @@ export class LasLazBatcher{
 	}
 
 	push (lasBuffer) {
-		const workerPath = Potree.scriptPath + '/workers/LASDecoderWorker.js';
-		const worker = Potree.workerPool.getWorker(workerPath);
+		const workerPath = scriptPath + '/workers/LASDecoderWorker.js';
+		const worker = workerPool.getWorker(workerPath);
 		const node = this.node;
 		const pointAttributes = node.pcoGeometry.pointAttributes;
 
@@ -172,10 +173,10 @@ export class LasLazBatcher{
 			this.node.numPoints = numPoints;
 			this.node.loaded = true;
 			this.node.loading = false;
-			Potree.numNodesLoading--;
+			nodes.decNodesLoading();
 			this.node.mean = new THREE.Vector3(...e.data.mean);
 
-			Potree.workerPool.returnWorker(workerPath, worker);
+			workerPool.returnWorker(workerPath, worker);
 		};
 
 		let message = {

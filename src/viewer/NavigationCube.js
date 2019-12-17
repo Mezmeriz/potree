@@ -1,4 +1,4 @@
-import { resourcePath } from '../utils.js';
+import { resourcePath } from '../Potree.js';
 
 export class NavigationCube extends THREE.Object3D {
 

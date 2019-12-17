@@ -2,7 +2,7 @@
 import {ClipTask, ClipMethod} from "./defines";
 import {Box3Helper} from "./utils/Box3Helper";
 import BinaryHeap from '../libs/other/BinaryHeap';
-import {maxNodesLoading, lru} from './Potree';
+import {lru, nodes} from './Potree';
 
 let pointCloudTransformVersion = new Map();
 
@@ -138,10 +138,10 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 
 		pointcloud.updateMatrixWorld();
 
-		if(!pointcloudTransformVersion.has(pointcloud)){
-			pointcloudTransformVersion.set(pointcloud, {number: 0, transform: pointcloud.matrixWorld.clone()});
+		if(!pointCloudTransformVersion.has(pointcloud)){
+			pointCloudTransformVersion.set(pointcloud, {number: 0, transform: pointcloud.matrixWorld.clone()});
 		}else{
-			let version = pointcloudTransformVersion.get(pointcloud);
+			let version = pointCloudTransformVersion.get(pointcloud);
 
 			if(!version.transform.equals(pointcloud.matrixWorld)){
 				version.number++;
@@ -218,22 +218,6 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 				let nyPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(nyN, ny);
 				let pzPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(pzN, pz);
 				let nzPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(nzN, nz);
-
-				//if(window.debugdraw !== undefined && window.debugdraw === true && node.name === "r60"){
-
-				//	Potree.utils.debugPlane(viewer.scene.scene, pxPlane, 1, 0xFF0000);
-				//	Potree.utils.debugPlane(viewer.scene.scene, nxPlane, 1, 0x990000);
-				//	Potree.utils.debugPlane(viewer.scene.scene, pyPlane, 1, 0x00FF00);
-				//	Potree.utils.debugPlane(viewer.scene.scene, nyPlane, 1, 0x009900);
-				//	Potree.utils.debugPlane(viewer.scene.scene, pzPlane, 1, 0x0000FF);
-				//	Potree.utils.debugPlane(viewer.scene.scene, nzPlane, 1, 0x000099);
-
-				//	Potree.utils.debugBox(viewer.scene.scene, box, new THREE.Matrix4(), 0x00FF00);
-				//	Potree.utils.debugBox(viewer.scene.scene, box, pointcloud.matrixWorld, 0xFF0000);
-				//	Potree.utils.debugBox(viewer.scene.scene, clipBox.box.boundingBox, clipBox.box.matrixWorld, 0xFF0000);
-
-				//	window.debugdraw = false;
-				//}
 
 				let frustum = new THREE.Frustum(pxPlane, nxPlane, pyPlane, nyPlane, pzPlane, nzPlane);
 				let intersects = frustum.intersectsBox(box);
@@ -317,7 +301,7 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 			if(node._transformVersion === undefined){
 				node._transformVersion = -1;
 			}
-			let transformVersion = pointcloudTransformVersion.get(pointcloud);
+			let transformVersion = pointCloudTransformVersion.get(pointcloud);
 			if(node._transformVersion !== transformVersion.number){
 				node.sceneNode.updateMatrix();
 				node.sceneNode.matrixWorld.multiplyMatrices(pointcloud.matrixWorld, node.sceneNode.matrix);	
@@ -387,17 +371,7 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 		}
 	}// end priority queue loop
 
-	// { // update DEM
-	// 	let maxDEMLevel = 4;
-	// 	let candidates = pointclouds
-	// 		.filter(p => (p.generateDEM && p.dem instanceof Potree.DEM));
-	// 	for (let pointcloud of candidates) {
-	// 		let updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= maxDEMLevel);
-	// 		pointcloud.dem.update(updatingNodes);
-	// 	}
-	// }
-
-	for (let i = 0; i < Math.min(maxNodesLoading, unloadedGeometry.length); i++) {
+	for (let i = 0; i < Math.min(nodes.maxNodesLoading, unloadedGeometry.length); i++) {
 		unloadedGeometry[i].load();
 	}
 

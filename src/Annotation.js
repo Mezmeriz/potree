@@ -1,7 +1,8 @@
 
 
 import {Action} from "./Actions.js";
-import {Utils, resourcePath} from "./utils.js";
+import {resourcePath} from "./Potree.js";
+import {Utils} from './utils.js';
 import {EventDispatcher} from "./EventDispatcher.js";
 
 export class Annotation extends EventDispatcher {

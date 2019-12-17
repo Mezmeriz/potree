@@ -3,7 +3,11 @@
 import {Annotation} from "../Annotation.js";
 import {Measure} from "../utils/Measure.js";
 import {CameraAnimation} from "../modules/CameraAnimation/CameraAnimation.js";
+import {OrientedImageLoader} from '../modules/OrientedImages/OrientedImages.js';
 import {Utils} from "../utils.js";
+import {Profile} from '../utils/Profile.js';
+import {GeoPackageLoader} from '../loader/GeoPackageLoader.js';
+
 
 function loadPointCloud(viewer, data){
 
@@ -120,7 +124,7 @@ function loadOrientedImages(viewer, images){
 		return;
 	}
 
-	Potree.OrientedImageLoader.load(cameraParamsPath, imageParamsPath, viewer).then( images => {
+	OrientedImageLoader.load(cameraParamsPath, imageParamsPath, viewer).then( images => {
 		viewer.scene.addOrientedImages(images);
 	});
 
@@ -144,7 +148,7 @@ function loadGeopackage(viewer, geopackage){
 		transform: transform,
 	};
 
-	Potree.GeoPackageLoader.loadUrl(path, params).then(data => {
+	GeoPackageLoader.loadUrl(path, params).then(data => {
 		viewer.scene.addGeopackage(data);
 	});
 	
@@ -256,7 +260,7 @@ function loadProfile(viewer, data){
 		return;
 	}
 
-	let profile = new Potree.Profile();
+	let profile = new Profile();
 	profile.name = name;
 	profile.uuid = data.uuid;
 

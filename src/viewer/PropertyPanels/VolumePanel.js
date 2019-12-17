@@ -1,15 +1,15 @@
 
 import {Utils} from "../../utils.js";
 import {Volume, BoxVolume, SphereVolume} from "../../utils/Volume.js";
-
+import {resourcePath} from '../../Potree';
 import {MeasurePanel} from "./MeasurePanel.js";
 
 export class VolumePanel extends MeasurePanel{
 	constructor(viewer, measurement, propertiesPanel){
 		super(viewer, measurement, propertiesPanel);
 
-		let copyIconPath = Potree.resourcePath + '/icons/copy.svg';
-		let removeIconPath = Potree.resourcePath + '/icons/remove.svg';
+		let copyIconPath = resourcePath + '/icons/copy.svg';
+		let removeIconPath = resourcePath + '/icons/remove.svg';
 
 		let lblLengthText = new Map([
 			[BoxVolume, "length"],

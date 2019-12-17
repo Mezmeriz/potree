@@ -1,5 +1,5 @@
 import {XHRFactory} from "../../XHRFactory.js";
-
+import {scriptPath, workerPool} from '../../Potree.js';
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
  *	  http://plas.io/
@@ -102,9 +102,9 @@ export class EptLazBatcher {
 	constructor(node) { this.node = node; }
 
 	push(las) {
-		let workerPath = Potree.scriptPath +
+		let workerPath = scriptPath +
 			'/workers/EptLaszipDecoderWorker.js';
-		let worker = Potree.workerPool.getWorker(workerPath);
+		let worker = workerPool.getWorker(workerPath);
 
 		worker.onmessage = (e) => {
 			let g = new THREE.BufferGeometry();
@@ -150,7 +150,7 @@ export class EptLazBatcher {
 				numPoints,
 				new THREE.Vector3(...e.data.mean));
 
-			Potree.workerPool.returnWorker(workerPath, worker);
+			workerPool.returnWorker(workerPath, worker);
 		};
 
 		let message = {

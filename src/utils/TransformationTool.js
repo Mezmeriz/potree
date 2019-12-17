@@ -1,6 +1,7 @@
 
 
-import {Utils, resourcePath} from "../utils.js";
+import {resourcePath} from "../Potree.js";
+import {Utils} from '../utils.js';
 
 export class TransformationTool {
 	constructor(viewer) {

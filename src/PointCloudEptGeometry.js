@@ -1,5 +1,11 @@
 import {PointCloudTreeNode} from "./PointCloudTree.js";
 import {PointAttributes, PointAttribute, PointAttributeTypes} from "./loader/PointAttributes.js";
+import {Version} from './Version.js';
+import {EptLaszipLoader} from './loader/ept/LaszipLoader.js';
+import {EptZstandardLoader} from './loader/ept/ZstandardLoader.js';
+import {EptBinaryLoader} from './loader/ept/BinaryLoader.js';
+import {nodes} from './Potree.js';
+
 
 class U {
 	static toVector3(v, offset) {
@@ -49,7 +55,7 @@ export class PointCloudEptGeometry {
 		this.offset = U.toVector3([0, 0, 0]);
 		this.boundingSphere = U.sphereFrom(this.boundingBox);
 		this.tightBoundingSphere = U.sphereFrom(this.tightBoundingBox);
-		this.version = new Potree.Version('1.6');
+		this.version = new Version('1.6');
 
 		this.projection = null;
 		this.fallbackProjection = null;
@@ -89,13 +95,13 @@ export class PointCloudEptGeometry {
 
 		const dataType = info.dataType;
 		if (dataType == 'laszip') {
-			this.loader = new Potree.EptLaszipLoader();
+			this.loader = new EptLaszipLoader();
 		}
 		else if (dataType == 'binary') {
-			this.loader = new Potree.EptBinaryLoader();
+			this.loader = new EptBinaryLoader();
 		}
 		else if (dataType == 'zstandard') {
-			this.loader = new Potree.EptZstandardLoader();
+			this.loader = new EptZstandardLoader();
 		}
 		else {
 			throw new Error('Could not read data type: ' + dataType);
@@ -131,7 +137,7 @@ export class EptKey {
 		if (c)	min.z += dst.z / 2;
 		else	max.z -= dst.z / 2;
 
-		return new Potree.EptKey(
+		return new EptKey(
 				this.ept,
 				new THREE.Box3(min, max),
 				this.d + 1,
@@ -159,7 +165,7 @@ export class PointCloudEptGeometryNode extends PointCloudTreeNode {
 		super();
 
 		this.ept = ept;
-		this.key = new Potree.EptKey(
+		this.key = new EptKey(
 				this.ept,
 				b || this.ept.boundingBox,
 				d || 0,
@@ -219,10 +225,10 @@ export class PointCloudEptGeometryNode extends PointCloudTreeNode {
 
 	load() {
 		if (this.loaded || this.loading) return;
-		if (Potree.numNodesLoading >= Potree.maxNodesLoading) return;
+		if (nodes.numNodesLoading >= nodes.maxNodesLoading) return;
 
 		this.loading = true;
-		++Potree.numNodesLoading;
+		nodes.incNodesLoading();
 
 		if (this.numPoints == -1) this.loadHierarchy();
 		this.loadPoints();
@@ -267,7 +273,7 @@ export class PointCloudEptGeometryNode extends PointCloudTreeNode {
 
 			let key = parentNode.key.step(a, b, c);
 
-			let node = new Potree.PointCloudEptGeometryNode(
+			let node = new PointCloudEptGeometryNode(
 					this.ept,
 					key.b,
 					key.d,
@@ -291,7 +297,7 @@ export class PointCloudEptGeometryNode extends PointCloudTreeNode {
 		this.mean = mean;
 		this.loaded = true;
 		this.loading = false;
-		--Potree.numNodesLoading;
+		nodes.decNodesLoading();
 	}
 
 	toPotreeName(d, x, y, z) {

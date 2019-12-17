@@ -1,4 +1,6 @@
 
+import {SphereVolume} from '../utils/Volume';
+
 export class PotreeRenderer {
 
 	constructor (viewer) {
@@ -62,7 +64,7 @@ export class PotreeRenderer {
 		}
 		
 		viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, null, {
-			clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
+			clipSpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
 		});
 		
 		// render scene
