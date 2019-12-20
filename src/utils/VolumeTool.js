@@ -1,8 +1,10 @@
 
 
 import {Volume, BoxVolume} from "./Volume.js";
-import {Utils} from "../utils.js";
 import { EventDispatcher } from "../EventDispatcher.js";
+import {Mouse} from './Mouse.js';
+import {Calc} from './Calc.js';
+import {Display} from './Display.js';
 
 export class VolumeTool extends EventDispatcher{
 	constructor (viewer) {
@@ -83,7 +85,7 @@ export class VolumeTool extends EventDispatcher{
 		let drag = e => {
 			let camera = this.viewer.scene.getActiveCamera();
 			
-			let I = Utils.getMousePointCloudIntersection(
+			let I = Mouse.getMousePointCloudIntersection(
 				e.drag.end, 
 				this.viewer.scene.getActiveCamera(), 
 				this.viewer, 
@@ -139,7 +141,7 @@ export class VolumeTool extends EventDispatcher{
 			{
 
 				let distance = label.position.distanceTo(camera.position);
-				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let pr = Calc.projectedRadius(1, camera, distance, clientWidth, clientHeight);
 
 				let scale = (70 / pr);
 				label.scale.set(scale, scale, scale);
@@ -147,7 +149,7 @@ export class VolumeTool extends EventDispatcher{
 
 			let calculatedVolume = volume.getVolume();
 			calculatedVolume = calculatedVolume / Math.pow(this.viewer.lengthUnit.unitspermeter, 3) * Math.pow(this.viewer.lengthUnitDisplay.unitspermeter, 3);  //convert to cubic meters then to the cubic display unit
-			let text = Utils.addCommas(calculatedVolume.toFixed(3)) + ' ' + this.viewer.lengthUnitDisplay.code + '\u00B3';
+			let text = Display.addCommas(calculatedVolume.toFixed(3)) + ' ' + this.viewer.lengthUnitDisplay.code + '\u00B3';
 			label.setText(text);
 		}
 	}

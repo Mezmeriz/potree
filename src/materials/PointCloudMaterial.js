@@ -2,7 +2,6 @@
 import {Utils} from "../utils.js";
 import {resourcePath} from '../Potree.js';
 import {Gradients} from "./Gradients.js";
-import {Shaders} from "../../build/shaders/shaders.js";
 import {ClassificationScheme} from "./ClassificationScheme.js";
 import {PointSizeType, PointShape, TreeType, ElevationGradientRepeat} from "../defines.js";
 
@@ -27,7 +26,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			}else{
 				return b;
 			}
-		}
+		};
 
 		let pointSize = getValid(parameters.size, 1.0);
 		let minSize = getValid(parameters.minSize, 2.0);

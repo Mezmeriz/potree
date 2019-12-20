@@ -3,6 +3,7 @@ import {PointCloudTree} from "./PointCloudTree.js";
 import {PointCloudOctreeNode} from "./PointCloudOctree.js";
 import {PointCloudArena4DNode} from "./arena4d/PointCloudArena4D.js";
 import {PointSizeType, ClipTask, ElevationGradientRepeat} from "./defines.js";
+import {debug} from './Potree.js';
 
 // Copied from three.js: WebGLRenderer.js
 function paramThreeToGL(_gl, p) {
@@ -648,7 +649,6 @@ export class Renderer {
 		while (stack.length > 0) {
 
 			let node = stack.pop();
-
 			if (node instanceof PointCloudTree) {
 				octrees.push(node);
 				continue;
@@ -853,9 +853,9 @@ export class Renderer {
 			{
 				let uFilterReturnNumberRange = material.uniforms.uFilterReturnNumberRange.value;
 				let uFilterNumberOfReturnsRange = material.uniforms.uFilterNumberOfReturnsRange.value;
-				
-				
-				
+
+
+
 				shader.setUniform2f("uFilterReturnNumberRange", uFilterReturnNumberRange);
 				shader.setUniform2f("uFilterNumberOfReturnsRange", uFilterNumberOfReturnsRange);
 			}
@@ -888,7 +888,7 @@ export class Renderer {
 				for(const attributeName in geometry.attributes){
 					const bufferAttribute = geometry.attributes[attributeName];
 					const vbo = webglBuffer.vbos.get(attributeName);
-					
+
 					gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
 					gl.disableVertexAttribArray(attributeLocation);
 				}
@@ -928,7 +928,7 @@ export class Renderer {
 					];
 
 					shader.setUniform2f("uExtraNormalizedRange", normalizedBufferRange);
-					
+
 					if(offset === 0 && scale === 1){
 						shader.setUniform2f("uExtraRange", material.extraRange);
 					}else{
@@ -939,7 +939,7 @@ export class Renderer {
 						shader.setUniform2f("uExtraRange", extraRange);
 					}
 
-					
+
 				}
 
 
@@ -961,11 +961,11 @@ export class Renderer {
 
 						let type = this.glTypeMapping.get(bufferAttribute.array.constructor);
 						let normalized = bufferAttribute.normalized;
-						
+
 						gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
 						gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
 						gl.enableVertexAttribArray(attributeLocation);
-						
+
 					}
 				}
 			}

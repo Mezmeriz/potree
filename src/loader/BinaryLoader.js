@@ -2,7 +2,7 @@
 
 import {Version} from "../Version.js";
 import {XHRFactory} from "../XHRFactory.js";
-import {scriptPath, workerPool, nodes} from '../Potree.js';
+import {resourcePath, workerPool, nodes} from '../Potree.js';
 
 export class BinaryLoader{
 
@@ -59,7 +59,7 @@ export class BinaryLoader{
 			node.numPoints = numPoints;
 		}
 
-		let workerPath = scriptPath + '/workers/BinaryDecoderWorker.js';
+		let workerPath = resourcePath + '/workers/BinaryDecoderWorker.js';
 		let worker = workerPool.getWorker(workerPath);
 
 		worker.onmessage = function (e) {

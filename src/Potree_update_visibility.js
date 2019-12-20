@@ -1,4 +1,3 @@
-
 import {ClipTask, ClipMethod} from "./defines";
 import {Box3Helper} from "./utils/Box3Helper";
 import BinaryHeap from '../libs/other/BinaryHeap';
@@ -6,7 +5,7 @@ import {lru, nodes} from './Potree';
 
 let pointCloudTransformVersion = new Map();
 
-export function updatePointClouds(pointclouds, camera, renderer){
+export function updatePointClouds(pointclouds, camera, renderer, pointBudget){
 
 	for (let pointcloud of pointclouds) {
 		let start = performance.now();
@@ -23,7 +22,7 @@ export function updatePointClouds(pointclouds, camera, renderer){
 		let duration = performance.now() - start;
 	}
 
-	let result = updateVisibility(pointclouds, camera, renderer);
+	let result = updateVisibility(pointclouds, camera, renderer, pointBudget);
 
 	for (let pointcloud of pointclouds) {
 		pointcloud.updateMaterial(pointcloud.material, pointcloud.visibleNodes, camera, renderer);

@@ -15,6 +15,7 @@ import {CameraAnimation} from "../modules/CameraAnimation/CameraAnimation.js"
 
 import {resourcePath, version} from '../Potree.js';
 import {saveProject} from './SaveProject.js';
+import {Display} from '../utils/Display.js';
 
 export class Sidebar{
 
@@ -934,7 +935,7 @@ export class Sidebar{
 			const [min, max] = [Infinity, -Infinity];
 
 			const format = (value) => {
-				return Utils.addCommas(value.toFixed(3));
+				return Display.addCommas(value.toFixed(3));
 			};
 
 			const updateLabels = () => {
@@ -1339,7 +1340,7 @@ export class Sidebar{
 		});
 
 		this.viewer.addEventListener('point_budget_changed', (event) => {
-			$('#lblPointBudget')[0].innerHTML = Utils.addCommas(this.viewer.getPointBudget());
+			$('#lblPointBudget')[0].innerHTML = Display.addCommas(this.viewer.getPointBudget());
 			sldPointBudget.slider({value: this.viewer.getPointBudget()});
 		});
 
@@ -1362,7 +1363,7 @@ export class Sidebar{
 			$("input[name=background][value='" + this.viewer.getBackground() + "']").prop('checked', true);
 		});
 
-		$('#lblPointBudget')[0].innerHTML = Utils.addCommas(this.viewer.getPointBudget());
+		$('#lblPointBudget')[0].innerHTML = Display.addCommas(this.viewer.getPointBudget());
 		$('#lblFOV')[0].innerHTML = parseInt(this.viewer.getFOV());
 		$('#lblEDLRadius')[0].innerHTML = this.viewer.getEDLRadius().toFixed(1);
 		$('#lblEDLStrength')[0].innerHTML = this.viewer.getEDLStrength().toFixed(1);

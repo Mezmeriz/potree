@@ -1,5 +1,6 @@
 
 import {Utils} from "../../utils.js";
+import {Display} from '../../utils/Display.js';
 import {resourcePath} from '../../Potree.js';
 
 export class AnnotationPanel{
@@ -79,7 +80,7 @@ export class AnnotationPanel{
 	update(){
 		const {annotation, elContent, elTitle, elDescription} = this;
 
-		let pos = annotation.position.toArray().map(c => Utils.addCommas(c.toFixed(3)));
+		let pos = annotation.position.toArray().map(c => Display.addCommas(c.toFixed(3)));
 		elContent.find("#annotation_position_x").html(pos[0]);
 		elContent.find("#annotation_position_y").html(pos[1]);
 		elContent.find("#annotation_position_z").html(pos[2]);

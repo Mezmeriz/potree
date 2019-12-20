@@ -1,10 +1,12 @@
 
 import {PointCloudMaterial} from "../materials/PointCloudMaterial.js";
-import {Utils} from "../utils.js";
+import {Calc} from '../utils/Calc.js';
+import {Display} from '../utils/Display.js';
 import {Points} from "../Points.js";
 import {CSVExporter} from "../exporter/CSVExporter.js";
 import {LASExporter} from "../exporter/LASExporter.js";
 import { EventDispatcher } from "../EventDispatcher.js";
+import {resourcePath} from '../Potree.js';
 
 class ProfilePointCloudEntry{
 
@@ -233,7 +235,6 @@ export class ProfileWindow extends EventDispatcher {
 		this.initSVG();
 		this.initListeners();
 
-		this.elRoot.i18n();
 	}
 
 	initListeners () {
@@ -253,7 +254,7 @@ export class ProfileWindow extends EventDispatcher {
 			let camera = this.viewer.scene.getActiveCamera();
 			let domElement = this.viewer.renderer.domElement;
 			let distance = this.viewerPickSphere.position.distanceTo(camera.position);
-			let pr = Utils.projectedRadius(1, camera, distance, domElement.clientWidth, domElement.clientHeight);
+			let pr = Calc.projectedRadius(1, camera, distance, domElement.clientWidth, domElement.clientHeight);
 			let scale = (10 / pr);
 			this.viewerPickSphere.scale.set(scale, scale, scale);
 		};
@@ -310,7 +311,7 @@ export class ProfileWindow extends EventDispatcher {
 					for (let attribute of Object.keys(point)) {
 						let value = point[attribute];
 						if (attribute === 'position') {
-							let values = [...value].map(v => Utils.addCommas(v.toFixed(3)));
+							let values = [...value].map(v => Display.addCommas(v.toFixed(3)));
 							html += `
 								<tr>
 									<td>x</td>
@@ -690,7 +691,7 @@ export class ProfileWindow extends EventDispatcher {
 		for (let [key, value] of this.pointclouds.entries()) {
 			numPoints += value.points.reduce( (a, i) => a + i.numPoints, 0);
 		}
-		$(`#profile_num_points`).html(Utils.addCommas(numPoints));
+		$(`#profile_num_points`).html(Display.addCommas(numPoints));
 
 	}
 

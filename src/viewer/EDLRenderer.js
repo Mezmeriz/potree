@@ -203,7 +203,8 @@ export class EDLRenderer{
 			let result = updatePointClouds(
 				viewer.scene.pointclouds, 
 				camera, 
-				viewer.renderer);
+				viewer.renderer,
+				viewer.pointBudget);
 			viewer.pointBudget = oldBudget;
 		}
 

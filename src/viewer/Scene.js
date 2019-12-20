@@ -26,6 +26,7 @@ export class Scene extends EventDispatcher{
 		this.cameraMode = CameraMode.PERSPECTIVE;
 		this.overrideCamera = null;
 		this.pointclouds = [];
+		this.photoSpheres = [];
 
 		this.measurements = [];
 		this.profiles = [];
@@ -117,6 +118,31 @@ export class Scene extends EventDispatcher{
 		}
 
 		return box;
+	}
+
+	addPhotoSphere(photoSphere) {
+		this.photoSpheres.push(photoSphere);
+		this.scene.add(photoSphere);
+	}
+
+	addAllPhotospheres(){
+		this.photoSpheres.forEach(sphere => this.addPhotoSphere(sphere));
+	}
+
+	removePhotosphere(photoSphere) {
+		this.scene.remove(photoSphere)
+	}
+
+	removeAllPhotospheres(){
+		this.photoSpheres.forEach(sphere => this.removePhotosphere(sphere));
+	}
+
+	addMesh(mesh) {
+		this.scene.add(mesh);
+	}
+
+	removeMesh(mesh) {
+		this.scene.remove(mesh);
 	}
 
 	addPointCloud (pointcloud) {
@@ -366,28 +392,28 @@ export class Scene extends EventDispatcher{
 			this.sceneBG.add(bg);
 		}
 
-		// { // lights
-		// 	{
-		// 		let light = new THREE.DirectionalLight(0xffffff);
-		// 		light.position.set(10, 10, 1);
-		// 		light.target.position.set(0, 0, 0);
-		// 		this.scene.add(light);
-		// 	}
+		{ // lights
+			{
+				let light = new THREE.DirectionalLight(0xffffff);
+				light.position.set(10, 10, 1);
+				light.target.position.set(0, 0, 0);
+				this.scene.add(light);
+			}
 
-		// 	{
-		// 		let light = new THREE.DirectionalLight(0xffffff);
-		// 		light.position.set(-10, 10, 1);
-		// 		light.target.position.set(0, 0, 0);
-		// 		this.scene.add(light);
-		// 	}
+			{
+				let light = new THREE.DirectionalLight(0xffffff);
+				light.position.set(-10, 10, 1);
+				light.target.position.set(0, 0, 0);
+				this.scene.add(light);
+			}
 
-		// 	{
-		// 		let light = new THREE.DirectionalLight(0xffffff);
-		// 		light.position.set(0, -10, 20);
-		// 		light.target.position.set(0, 0, 0);
-		// 		this.scene.add(light);
-		// 	}
-		// }
+			{
+				let light = new THREE.DirectionalLight(0xffffff);
+				light.position.set(0, -10, 20);
+				light.target.position.set(0, 0, 0);
+				this.scene.add(light);
+			}
+		}
 	}
 	
 	addAnnotation(position, args = {}){		

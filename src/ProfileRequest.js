@@ -1,5 +1,7 @@
 
 import {Points} from "./Points";
+import {lru} from './Potree.js';
+import BinaryHeap from '../libs/other/BinaryHeap.js';
 
 export class ProfileData {
 	constructor (profile) {

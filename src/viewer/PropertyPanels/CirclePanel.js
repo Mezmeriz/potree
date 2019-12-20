@@ -2,7 +2,8 @@
 
 import {MeasurePanel} from "./MeasurePanel.js";
 import {resourcePath} from '../../Potree.js';
-import {Utils} from '../../utils.js';
+import {Calc} from '../../utils/Calc.js';
+import {Display} from '../../utils/Display.js';
 
 
 export class CirclePanel extends MeasurePanel{
@@ -54,12 +55,12 @@ export class CirclePanel extends MeasurePanel{
 		const B = this.measurement.points[1].position;
 		const C = this.measurement.points[2].position;
 
-		const center = Utils.computeCircleCenter(A, B, C);
+		const center = Calc.computeCircleCenter(A, B, C);
 		const radius = center.distanceTo(A);
 		const circumference = 2 * Math.PI * radius;
 		
 		const format = (number) => {
-			return Utils.addCommas(number.toFixed(3));
+			return Display.addCommas(number.toFixed(3));
 		};
 
 		

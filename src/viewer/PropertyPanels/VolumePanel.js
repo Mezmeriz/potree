@@ -1,8 +1,9 @@
 
 import {Utils} from "../../utils.js";
-import {Volume, BoxVolume, SphereVolume} from "../../utils/Volume.js";
+import {BoxVolume, SphereVolume} from "../../utils/Volume.js";
 import {resourcePath} from '../../Potree';
 import {MeasurePanel} from "./MeasurePanel.js";
+import {Display} from '../../utils/Display.js';
 
 export class VolumePanel extends MeasurePanel{
 	constructor(viewer, measurement, propertiesPanel){
@@ -363,7 +364,7 @@ export class VolumePanel extends MeasurePanel{
 
 		{
 			let dimensions = this.measurement.scale.toArray();
-			dimensions = dimensions.map(v => Utils.addCommas(v.toFixed(2)));
+			dimensions = dimensions.map(v => Display.addCommas(v.toFixed(2)));
 
 			let elLength = this.elContent.find(`#cell_length`);
 			let elWidth = this.elContent.find(`#cell_width`);
@@ -377,7 +378,7 @@ export class VolumePanel extends MeasurePanel{
 		{
 			let elVolume = this.elContent.find(`#measurement_volume`);
 			let volume = this.measurement.getVolume();
-			elVolume.html(Utils.addCommas(volume.toFixed(2)));
+			elVolume.html(Display.addCommas(volume.toFixed(2)));
 		}
 
 		this.elCheckClip.prop("checked", this.measurement.clip);

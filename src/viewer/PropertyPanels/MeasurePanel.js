@@ -2,6 +2,8 @@
 
 import {resourcePath} from "../../Potree.js";
 import {Utils} from '../../utils.js';
+import {Display} from '../../utils/Display.js';
+
 
 export class MeasurePanel{
 
@@ -28,9 +30,9 @@ export class MeasurePanel{
 		let copyIconPath = resourcePath + '/icons/copy.svg';
 
 		for (let point of points) {
-			let x = Utils.addCommas(point.x.toFixed(3));
-			let y = Utils.addCommas(point.y.toFixed(3));
-			let z = Utils.addCommas(point.z.toFixed(3));
+			let x = Display.addCommas(point.x.toFixed(3));
+			let y = Display.addCommas(point.y.toFixed(3));
+			let z = Display.addCommas(point.z.toFixed(3));
 
 			let row = $(`
 				<tr>

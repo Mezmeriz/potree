@@ -3,7 +3,7 @@
  *
  */
 
-THREE.LineSegmentsGeometry = function () {
+export function LineSegmentsGeometry() {
 
 	THREE.InstancedBufferGeometry.call( this );
 
@@ -19,9 +19,9 @@ THREE.LineSegmentsGeometry = function () {
 
 };
 
-THREE.LineSegmentsGeometry.prototype = Object.assign( Object.create( THREE.InstancedBufferGeometry.prototype ), {
+LineSegmentsGeometry.prototype = Object.assign( Object.create( THREE.InstancedBufferGeometry.prototype ), {
 
-	constructor: THREE.LineSegmentsGeometry,
+	constructor: LineSegmentsGeometry,
 
 	isLineSegmentsGeometry: true,
 

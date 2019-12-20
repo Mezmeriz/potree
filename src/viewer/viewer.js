@@ -31,7 +31,7 @@ import { EventDispatcher } from "../EventDispatcher.js";
 import { ClassificationScheme } from "../materials/ClassificationScheme.js";
 
 import {updatePointClouds} from '../Potree_update_visibility';
-import {debug, lru, scriptPath} from '../Potree.js';
+import {debug, lru, scriptPath, resourcePath} from '../Potree.js';
 
 export class Viewer extends EventDispatcher{
 	
@@ -214,12 +214,12 @@ export class Viewer extends EventDispatcher{
 			this.setEDLOpacity(1.0);
 			this.setClipTask(ClipTask.HIGHLIGHT);
 			this.setClipMethod(ClipMethod.INSIDE_ANY);
-			this.setPointBudget(1*1000*1000);
+			this.setPointBudget(10*1000*1000);
 			this.setShowBoundingBox(false);
 			this.setFreeze(false);
-			this.setControls(this.orbitControls);
-			this.setBackground('gradient');
-
+			this.setControls(this.fpControls);
+			this.setBackground('white');
+			this.useHQ = true;
 			this.scaleFactor = 1;
 
 			this.loadSettingsFromURL();
@@ -1088,6 +1088,30 @@ export class Viewer extends EventDispatcher{
 
 		let viewer = this;
 		let sidebarContainer = $('#potree_sidebar_container');
+
+		let elProfile = $('<div>').load(new URL(scriptPath + '/assets/potree/profile.html').href, () => {
+			$(document.body).append(elProfile.children());
+			this.profileWindow = new ProfileWindow(this);
+			this.profileWindowController = new ProfileWindowController(this);
+
+			$('#profile_window').draggable({
+				handle: $('#profile_titlebar'),
+				containment: $(document.body)
+			});
+			$('#profile_window').resizable({
+				containment: $(document.body),
+				handles: 'n, e, s, w'
+			});
+
+			$(() => {
+				this.guiLoaded = true;
+				for(let task of this.guiLoadTasks){
+					task();
+				}
+
+			});
+		});
+
 		sidebarContainer.load(new URL(scriptPath + '/sidebar.html').href, () => {
 			sidebarContainer.css('width', '300px');
 			sidebarContainer.css('height', '100%');
@@ -1130,35 +1154,7 @@ export class Viewer extends EventDispatcher{
 				//if (callback) {
 				//	$(callback);
 				//}
-
-				let elProfile = $('<div>').load(new URL(scriptPath + '/profile.html').href, () => {
-					$(document.body).append(elProfile.children());
-					this.profileWindow = new ProfileWindow(this);
-					this.profileWindowController = new ProfileWindowController(this);
-
-					$('#profile_window').draggable({
-						handle: $('#profile_titlebar'),
-						containment: $(document.body)
-					});
-					$('#profile_window').resizable({
-						containment: $(document.body),
-						handles: 'n, e, s, w'
-					});
-
-					$(() => {
-						this.guiLoaded = true;
-						for(let task of this.guiLoadTasks){
-							task();
-						}
-
-					});
-				});
-
-				
-
 			});
-
-			
 		});
 	}
 
@@ -1280,7 +1276,7 @@ export class Viewer extends EventDispatcher{
 		this.renderer.autoClear = false;
 		this.renderArea.appendChild(this.renderer.domElement);
 		this.renderer.domElement.tabIndex = '2222';
-		this.renderer.domElement.style.position = 'absolute';
+		this.renderer.domElement.style.position = 'relative';
 		this.renderer.domElement.addEventListener('mousedown', () => {
 			this.renderer.domElement.focus();
 		});
@@ -1546,7 +1542,7 @@ export class Viewer extends EventDispatcher{
 		}
 
 		if (!this.freeze) {
-			let result = updatePointClouds(scene.pointclouds, camera, this.renderer);
+			let result = updatePointClouds(scene.pointclouds, camera, this.renderer, this.pointBudget);
 
 
 			// DEBUG - ONLY DISPLAY NODES THAT INTERSECT MOUSE
@@ -1731,18 +1727,17 @@ export class Viewer extends EventDispatcher{
 				pointcloud.material.elevationGradientRepeat = this.elevationGradientRepeat;
 			}
 		}
-		
+
 		{ // update navigation cube
 			this.navigationCube.update(camera.rotation);
 		}
 
 		this.updateAnnotations();
-		
+
 		if(this.mapView){
 			this.mapView.update(delta);
 			if(this.mapView.sceneProjection){
 				$( "#potree_map_toggle" ).css("display", "block");
-				
 			}
 		}
 
@@ -1771,7 +1766,6 @@ export class Viewer extends EventDispatcher{
 					this.hqRenderer = new HQSplatRenderer(this);
 				}
 				this.hqRenderer.useEDL = this.useEDL;
-				//this.hqRenderer.render(this.renderer);
 
 				pRenderer = this.hqRenderer;
 			}else{
@@ -1779,13 +1773,13 @@ export class Viewer extends EventDispatcher{
 					if (!this.edlRenderer) {
 						this.edlRenderer = new EDLRenderer(this);
 					}
-					//this.edlRenderer.render(this.renderer);
+
 					pRenderer = this.edlRenderer;
 				} else {
 					if (!this.potreeRenderer) {
 						this.potreeRenderer = new PotreeRenderer(this);
 					}
-					//this.potreeRenderer.render();
+
 					pRenderer = this.potreeRenderer;
 				}
 			}

@@ -3,20 +3,23 @@
  *
  */
 
-THREE.LineSegments2 = function ( geometry, material ) {
+import {LineSegmentsGeometry} from './LineSegmentsGeometry.js';
+import {LineMaterial} from './LineMaterial.js';
+
+export function LineSegments2( geometry, material ) {
 
 	THREE.Mesh.call( this );
 
 	this.type = 'LineSegments2';
 
-	this.geometry = geometry !== undefined ? geometry : new THREE.LineSegmentsGeometry();
-	this.material = material !== undefined ? material : new THREE.LineMaterial( { color: Math.random() * 0xffffff } );
+	this.geometry = geometry !== undefined ? geometry : new LineSegmentsGeometry();
+	this.material = material !== undefined ? material : new LineMaterial( { color: Math.random() * 0xffffff } );
 
 };
 
-THREE.LineSegments2.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
+LineSegments2.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
-	constructor: THREE.LineSegments2,
+	constructor: LineSegments2,
 
 	isLineSegments2: true,
 

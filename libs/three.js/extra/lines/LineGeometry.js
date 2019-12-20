@@ -3,17 +3,19 @@
  *
  */
 
-THREE.LineGeometry = function () {
+import {LineSegmentsGeometry} from './LineSegmentsGeometry.js';
 
-	THREE.LineSegmentsGeometry.call( this );
+export function LineGeometry() {
+
+	LineSegmentsGeometry.call( this );
 
 	this.type = 'LineGeometry';
 
 };
 
-THREE.LineGeometry.prototype = Object.assign( Object.create( THREE.LineSegmentsGeometry.prototype ), {
+LineGeometry.prototype = Object.assign( Object.create( LineSegmentsGeometry.prototype ), {
 
-	constructor: THREE.LineGeometry,
+	constructor: LineGeometry,
 
 	isLineGeometry: true,
 
@@ -36,7 +38,7 @@ THREE.LineGeometry.prototype = Object.assign( Object.create( THREE.LineSegmentsG
 
 		}
 
-		THREE.LineSegmentsGeometry.prototype.setPositions.call( this, points );
+		LineSegmentsGeometry.prototype.setPositions.call( this, points );
 
 		return this;
 
@@ -61,7 +63,7 @@ THREE.LineGeometry.prototype = Object.assign( Object.create( THREE.LineSegmentsG
 
 		}
 
-		THREE.LineSegmentsGeometry.prototype.setColors.call( this, colors );
+		LineSegmentsGeometry.prototype.setColors.call( this, colors );
 
 		return this;
 

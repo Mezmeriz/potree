@@ -1,7 +1,7 @@
 
 const XHRFactory = {
 	config: {
-		withCredentials: false,
+		withCredentials: true,
 		customHeaders: [
 			{ header: null, value: null }
 		]
@@ -9,6 +9,7 @@ const XHRFactory = {
 
 	createXMLHttpRequest: function () {
 		let xhr = new XMLHttpRequest();
+		xhr.withCredentials = this.config.withCredentials;
 
 		if (this.config.customHeaders &&
 			Array.isArray(this.config.customHeaders) &&
