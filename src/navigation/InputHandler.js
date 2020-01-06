@@ -7,6 +7,7 @@
 
 import {KeyCodes} from "../KeyCodes";
 import {Utils} from "../utils";
+import {Mouse} from '../utils/Mouse.js';
 import {EventDispatcher} from "../EventDispatcher.js";
 
 export class InputHandler extends EventDispatcher {
@@ -542,7 +543,7 @@ export class InputHandler extends EventDispatcher {
 	}
 
 	getMousePointCloudIntersection (mouse) {
-		return Utils.getMousePointCloudIntersection(
+		return Mouse.getMousePointCloudIntersection(
 			this.mouse, 
 			this.scene.getActiveCamera(), 
 			this.viewer, 

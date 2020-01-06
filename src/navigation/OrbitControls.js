@@ -14,8 +14,9 @@
  */
 
 
-import {MOUSE} from "../defines.js";
+import {MouseButtons} from "../defines.js";
 import {Utils} from "../utils.js";
+import {Mouse} from '../utils/Mouse.js';
 import {EventDispatcher} from "../EventDispatcher.js";
 
  
@@ -56,12 +57,12 @@ export class OrbitControls extends EventDispatcher{
 				y: e.drag.lastDrag.y / this.renderer.domElement.clientHeight
 			};
 
-			if (e.drag.mouse === MOUSE.LEFT) {
+			if (e.drag.mouse === MouseButtons.LEFT) {
 				this.yawDelta += ndrag.x * this.rotationSpeed;
 				this.pitchDelta += ndrag.y * this.rotationSpeed;
 
 				this.stopTweens();
-			} else if (e.drag.mouse === MOUSE.RIGHT) {
+			} else if (e.drag.mouse === MouseButtons.RIGHT) {
 				this.panDelta.x += ndrag.x;
 				this.panDelta.y += ndrag.y;
 
@@ -160,7 +161,7 @@ export class OrbitControls extends EventDispatcher{
 	zoomToLocation(mouse){
 		let camera = this.scene.getActiveCamera();
 		
-		let I = Utils.getMousePointCloudIntersection(
+		let I = Mouse.getMousePointCloudIntersection(
 			mouse,
 			camera,
 			this.viewer,

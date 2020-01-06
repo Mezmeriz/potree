@@ -14,7 +14,8 @@
  */
 
 
-import {MOUSE} from "../defines.js";
+import {MouseButtons} from "../defines.js";
+import {Mouse} from '../utils/Mouse.js';
 import {Utils} from "../utils.js";
 import {EventDispatcher} from "../EventDispatcher.js";
 
@@ -68,10 +69,10 @@ export class FirstPersonControls extends EventDispatcher {
 				y: e.drag.lastDrag.y / this.renderer.domElement.clientHeight
 			};
 
-			if (e.drag.mouse === MOUSE.LEFT) {
+			if (e.drag.mouse === MouseButtons.LEFT) {
 				this.yawDelta += ndrag.x * this.rotationSpeed;
 				this.pitchDelta += ndrag.y * this.rotationSpeed;
-			} else if (e.drag.mouse === MOUSE.RIGHT) {
+			} else if (e.drag.mouse === MouseButtons.RIGHT) {
 				this.translationDelta.x -= ndrag.x * moveSpeed * 100;
 				this.translationDelta.z += ndrag.y * moveSpeed * 100;
 			}
@@ -114,67 +115,100 @@ export class FirstPersonControls extends EventDispatcher {
 		this.pitchDelta = 0;
 		this.translationDelta.set(0, 0, 0);
 	}
-	
-	zoomToLocation(mouse){
+
+	zoomToLocation(mouse) {
 		let camera = this.scene.getActiveCamera();
-		
-		let I = Utils.getMousePointCloudIntersection(
+		let pI = Mouse.getMousePhotosphereIntersection(mouse,
+			camera,
+			this.viewer,
+			this.scene.photoSpheres);
+		let I = Mouse.getMousePointCloudIntersection(
 			mouse,
 			camera,
 			this.viewer,
 			this.scene.pointclouds);
 
-		if (I === null) {
-			return;
-		}
+		if (pI !== null) {
+			let cameraTargetPosition = pI.location;
+			let animationDuration = 600;
+			let easing = TWEEN.Easing.Quartic.Out;
 
-		let targetRadius = 0;
-		{
-			let minimumJumpDistance = 0.2;
+			{ // animate
+				let value = {x: 0};
+				let tween = new TWEEN.Tween(value).to({x: 1}, animationDuration);
+				tween.easing(easing);
+				this.tweens.push(tween);
 
-			let domElement = this.renderer.domElement;
-			let ray = Utils.mouseToRay(mouse, camera, domElement.clientWidth, domElement.clientHeight);
+				let startPos = this.scene.view.position.clone();
+				let targetPos = cameraTargetPosition.clone();
+				let startRadius = this.scene.view.radius;
+				let targetRadius = cameraTargetPosition.distanceTo(pI.location);
 
-			let nodes = I.pointcloud.nodesOnRay(I.pointcloud.visibleNodes, ray);
-			let lastNode = nodes[nodes.length - 1];
-			let radius = lastNode.getBoundingSphere(new THREE.Sphere()).radius;
-			targetRadius = Math.min(this.scene.view.radius, radius);
-			targetRadius = Math.max(minimumJumpDistance, targetRadius);
-		}
+				tween.onUpdate(() => {
+					let t = value.x;
+					this.scene.view.position.x = (1 - t) * startPos.x + t * targetPos.x;
+					this.scene.view.position.y = (1 - t) * startPos.y + t * targetPos.y;
+					this.scene.view.position.z = (1 - t) * startPos.z + t * targetPos.z;
 
-		let d = this.scene.view.direction.multiplyScalar(-1);
-		let cameraTargetPosition = new THREE.Vector3().addVectors(I.location, d.multiplyScalar(targetRadius));
-		// TODO Unused: let controlsTargetPosition = I.location;
+					this.scene.view.radius = (1 - t) * startRadius + t * targetRadius;
+					// this.viewer.setMoveSpeed(this.scene.view.radius / 2.5);
+				});
 
-		let animationDuration = 600;
-		let easing = TWEEN.Easing.Quartic.Out;
+				tween.onComplete(() => {
+					this.tweens = this.tweens.filter(e => e !== tween);
+				});
 
-		{ // animate
-			let value = {x: 0};
-			let tween = new TWEEN.Tween(value).to({x: 1}, animationDuration);
-			tween.easing(easing);
-			this.tweens.push(tween);
+				tween.start();
+			}
+		} else if (I !== null) {
+			let targetRadius = 0;
+			{
+				let minimumJumpDistance = 0.2;
 
-			let startPos = this.scene.view.position.clone();
-			let targetPos = cameraTargetPosition.clone();
-			let startRadius = this.scene.view.radius;
-			let targetRadius = cameraTargetPosition.distanceTo(I.location);
+				let domElement = this.renderer.domElement;
+				let ray = Utils.mouseToRay(mouse, camera, domElement.clientWidth, domElement.clientHeight);
 
-			tween.onUpdate(() => {
-				let t = value.x;
-				this.scene.view.position.x = (1 - t) * startPos.x + t * targetPos.x;
-				this.scene.view.position.y = (1 - t) * startPos.y + t * targetPos.y;
-				this.scene.view.position.z = (1 - t) * startPos.z + t * targetPos.z;
+				let nodes = I.pointcloud.nodesOnRay(I.pointcloud.visibleNodes, ray);
+				let lastNode = nodes[nodes.length - 1];
+				let radius = lastNode.getBoundingSphere(new THREE.Sphere()).radius;
+				targetRadius = Math.min(this.scene.view.radius, radius);
+				targetRadius = Math.max(minimumJumpDistance, targetRadius);
+			}
 
-				this.scene.view.radius = (1 - t) * startRadius + t * targetRadius;
-				this.viewer.setMoveSpeed(this.scene.view.radius / 2.5);
-			});
+			let d = this.scene.view.direction.multiplyScalar(-1);
+			let cameraTargetPosition = new THREE.Vector3().addVectors(I.location, d.multiplyScalar(targetRadius));
+			// TODO Unused: let controlsTargetPosition = I.location;
 
-			tween.onComplete(() => {
-				this.tweens = this.tweens.filter(e => e !== tween);
-			});
+			let animationDuration = 600;
+			let easing = TWEEN.Easing.Quartic.Out;
 
-			tween.start();
+			{ // animate
+				let value = {x: 0};
+				let tween = new TWEEN.Tween(value).to({x: 1}, animationDuration);
+				tween.easing(easing);
+				this.tweens.push(tween);
+
+				let startPos = this.scene.view.position.clone();
+				let targetPos = cameraTargetPosition.clone();
+				let startRadius = this.scene.view.radius;
+				let targetRadius = cameraTargetPosition.distanceTo(I.location);
+
+				tween.onUpdate(() => {
+					let t = value.x;
+					this.scene.view.position.x = (1 - t) * startPos.x + t * targetPos.x;
+					this.scene.view.position.y = (1 - t) * startPos.y + t * targetPos.y;
+					this.scene.view.position.z = (1 - t) * startPos.z + t * targetPos.z;
+
+					this.scene.view.radius = (1 - t) * startRadius + t * targetRadius;
+					this.viewer.setMoveSpeed(this.scene.view.radius / 2.5);
+				});
+
+				tween.onComplete(() => {
+					this.tweens = this.tweens.filter(e => e !== tween);
+				});
+
+				tween.start();
+			}
 		}
 	}
 

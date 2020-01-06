@@ -1,7 +1,7 @@
 
 
-import {MOUSE} from "../defines.js";
-import {Utils} from "../utils.js";
+import {MouseButtons} from "../defines.js";
+import {Mouse} from '../utils/Mouse.js';
 import {EventDispatcher} from "../EventDispatcher.js";
 
 export class EarthControls extends EventDispatcher {
@@ -53,7 +53,7 @@ export class EarthControls extends EventDispatcher {
 			let mouse = e.drag.end;
 			let domElement = this.viewer.renderer.domElement;
 
-			if (e.drag.mouse === MOUSE.LEFT) {
+			if (e.drag.mouse === MouseButtons.LEFT) {
 
 				let ray = Utils.mouseToRay(mouse, camStart, domElement.clientWidth, domElement.clientHeight);
 				let plane = new THREE.Plane().setFromNormalAndCoplanarPoint(
@@ -81,7 +81,7 @@ export class EarthControls extends EventDispatcher {
 						this.viewer.setMoveSpeed(speed);
 					}
 				}
-			} else if (e.drag.mouse === MOUSE.RIGHT) {
+			} else if (e.drag.mouse === MouseButtons.RIGHT) {
 				let ndrag = {
 					x: e.drag.lastDrag.x / this.renderer.domElement.clientWidth,
 					y: e.drag.lastDrag.y / this.renderer.domElement.clientHeight
@@ -115,7 +115,7 @@ export class EarthControls extends EventDispatcher {
 		};
 
 		let onMouseDown = e => {
-			let I = Utils.getMousePointCloudIntersection(
+			let I = Mouse.getMousePointCloudIntersection(
 				e.mouse, 
 				this.scene.getActiveCamera(), 
 				this.viewer, 
@@ -168,7 +168,7 @@ export class EarthControls extends EventDispatcher {
 	zoomToLocation(mouse){
 		let camera = this.scene.getActiveCamera();
 		
-		let I = Utils.getMousePointCloudIntersection(
+		let I = Mouse.getMousePointCloudIntersection(
 			mouse,
 			camera,
 			this.viewer,
@@ -236,7 +236,7 @@ export class EarthControls extends EventDispatcher {
 		
 		// compute zoom
 		if (this.wheelDelta !== 0) {
-			let I = Utils.getMousePointCloudIntersection(
+			let I = Mouse.getMousePointCloudIntersection(
 				this.viewer.inputHandler.mouse, 
 				this.scene.getActiveCamera(), 
 				this.viewer, 

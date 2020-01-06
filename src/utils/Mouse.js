@@ -55,4 +55,24 @@ export class Mouse {
             return null;
         }
     }
+
+    static getMousePhotosphereIntersection(mouse, camera, viewer, photoSpheres) {
+        let renderer = viewer.renderer;
+
+        let nmouse = {
+            x: (mouse.x / renderer.domElement.clientWidth) * 2 - 1,
+            y: -(mouse.y / renderer.domElement.clientHeight) * 2 + 1
+        };
+
+        let raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(nmouse, camera);
+        const intersects = raycaster.intersectObjects(photoSpheres, true);
+
+        if (intersects.length > 0) {
+            return {location: intersects[0].object.position};
+        } else {
+            return null;
+        }
+    }
+
 }
