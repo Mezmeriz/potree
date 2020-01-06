@@ -1,10 +1,5 @@
 
 import {XHRFactory} from "./XHRFactory.js";
-import {Volume} from "./utils/Volume.js";
-import {Profile} from './utils/Profile.js';
-import {Measure} from "./utils/Measure.js";
-import {PolygonClipVolume} from "./utils/PolygonClipVolume.js";
-import {resourcePath} from './Potree.js';
 
 export class Utils {
 	static async loadShapefileFeatures (file, callback) {
@@ -410,83 +405,6 @@ export class Utils {
 		}
 	}
 
-	static pixelsArrayToImage (pixels, width, height) {
-		let canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-
-		let context = canvas.getContext('2d');
-
-		pixels = new pixels.constructor(pixels);
-
-		for (let i = 0; i < pixels.length; i++) {
-			pixels[i * 4 + 3] = 255;
-		}
-
-		let imageData = context.createImageData(width, height);
-		imageData.data.set(pixels);
-		context.putImageData(imageData, 0, 0);
-
-		let img = new Image();
-		img.src = canvas.toDataURL();
-		// img.style.transform = "scaleY(-1)";
-
-		return img;
-	}
-
-	static pixelsArrayToDataUrl(pixels, width, height) {
-		let canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-
-		let context = canvas.getContext('2d');
-
-		pixels = new pixels.constructor(pixels);
-
-		for (let i = 0; i < pixels.length; i++) {
-			pixels[i * 4 + 3] = 255;
-		}
-
-		let imageData = context.createImageData(width, height);
-		imageData.data.set(pixels);
-		context.putImageData(imageData, 0, 0);
-
-		let dataURL = canvas.toDataURL();
-
-		return dataURL;
-	}
-
-	static pixelsArrayToCanvas(pixels, width, height){
-		let canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-
-		let context = canvas.getContext('2d');
-
-		pixels = new pixels.constructor(pixels);
-
-		//for (let i = 0; i < pixels.length; i++) {
-		//	pixels[i * 4 + 3] = 255;
-		//}
-
-		// flip vertically
-		let bytesPerLine = width * 4;
-		for(let i = 0; i < parseInt(height / 2); i++){
-			let j = height - i - 1;
-
-			let lineI = pixels.slice(i * bytesPerLine, i * bytesPerLine + bytesPerLine);
-			let lineJ = pixels.slice(j * bytesPerLine, j * bytesPerLine + bytesPerLine);
-			pixels.set(lineJ, i * bytesPerLine);
-			pixels.set(lineI, j * bytesPerLine);
-		}
-
-		let imageData = context.createImageData(width, height);
-		imageData.data.set(pixels);
-		context.putImageData(imageData, 0, 0);
-
-		return canvas;
-	}
-
 	static removeListeners(dispatcher, type){
 		if (dispatcher._listeners === undefined) {
 			return;
@@ -657,37 +575,6 @@ export class Utils {
 		return texture;
 	}
 
-	// from http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-	static getParameterByName (name) {
-		name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-		let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-		let results = regex.exec(document.location.search);
-		return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
-	}
-
-	static setParameter (name, value) {
-		// value = encodeURIComponent(value);
-
-		name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-		let regex = new RegExp('([\\?&])(' + name + '=([^&#]*))');
-		let results = regex.exec(document.location.search);
-
-		let url = window.location.href;
-		if (results === null) {
-			if (window.location.search.length === 0) {
-				url = url + '?';
-			} else {
-				url = url + '&';
-			}
-
-			url = url + name + '=' + value;
-		} else {
-			let newValue = name + '=' + value;
-			url = url.replace(results[2], newValue);
-		}
-		window.history.replaceState({}, '', url);
-	}
-
 	static createChildAABB(aabb, index){
 		let min = aabb.min.clone();
 		let max = aabb.max.clone();
@@ -716,6 +603,7 @@ export class Utils {
 
 	// see https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 	static clipboardCopy(text){
+		console.log('clipboard copy');
 		let textArea = document.createElement("textarea");
 
 		textArea.style.position = 'fixed';
@@ -752,53 +640,6 @@ export class Utils {
 
 		document.body.removeChild(textArea);
 
-	}
-
-	static getMeasurementIcon(measurement){
-		if (measurement instanceof Measure) {
-			if (measurement.showDistances && !measurement.showArea && !measurement.showAngles) {
-				return `${resourcePath}/icons/distance.svg`;
-			} else if (measurement.showDistances && measurement.showArea && !measurement.showAngles) {
-				return `${resourcePath}/icons/area.svg`;
-			} else if (measurement.maxMarkers === 1) {
-				return `${resourcePath}/icons/point.svg`;
-			} else if (!measurement.showDistances && !measurement.showArea && measurement.showAngles) {
-				return `${resourcePath}/icons/angle.png`;
-			} else if (measurement.showHeight) {
-				return `${resourcePath}/icons/height.svg`;
-			} else {
-				return `${resourcePath}/icons/distance.svg`;
-			}
-		} else if (measurement instanceof Profile) {
-			return `${resourcePath}/icons/profile.svg`;
-		} else if (measurement instanceof Volume) {
-			return `${resourcePath}/icons/volume.svg`;
-		} else if (measurement instanceof PolygonClipVolume) {
-			return `${resourcePath}/icons/clip-polygon.svg`;
-		}
-	}
-
-	static async loadScript(url){
-
-		return new Promise( resolve => {
-
-			const element = document.getElementById(url);
-
-			if(element){
-				resolve();
-			}else{
-				const script = document.createElement("script");
-
-				script.id = url;
-
-				script.onload = () => {
-					resolve();
-				};
-				script.src = url;
-
-				document.body.appendChild(script);
-			}
-		});
 	}
 
 	static createSvgGradient(scheme){
