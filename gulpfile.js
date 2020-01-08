@@ -6,13 +6,11 @@ const exec = require('child_process').exec;
 const fs = require("fs");
 const fsp = fs.promises;
 const concat = require('gulp-concat');
-const connect = require('gulp-connect');
-const {watch} = gulp;
-
-const {createExamplesPage} = require("./src/tools/create_potree_page");
-const {createGithubPage} = require("./src/tools/create_github_page");
-const {createIconsPage} = require("./src/tools/create_icons_page");
-
+const uglifyes = require('uglify-es');
+const composer = require('gulp-uglify/composer');
+const uglify = composer(uglifyes, console);
+const rename = require('gulp-rename');
+const header = require('gulp-header');
 
 let paths = {
 	laslaz: [
@@ -69,34 +67,6 @@ let shaders = [
 	"src/materials/shaders/blur.fs",
 ];
 
-// For development, it is now possible to use 'gulp webserver'
-// from the command line to start the server (default port is 8080)
-gulp.task('webserver', gulp.series(async function() {
-	server = connect.server({port: 1234});
-}));
-
-gulp.task('examples_page', async function(done) {
-	await Promise.all([
-		createExamplesPage(),
-		createGithubPage(),
-	]);
-
-	done();
-});
-
-gulp.task('icons_viewer', async function(done) {
-	await createIconsPage();
-
-	done();
-
-});
-
-gulp.task('test', async function() {
-
-	console.log("asdfiae8ofh");
-
-});
-
 gulp.task("workers", async function(done){
 
 	for(let workerName of Object.keys(workers)){
@@ -142,17 +112,17 @@ gulp.task("shaders", async function(){
 
 	const content = components.join("\n\n");
 
-	const targetPath = `./build/shaders/shaders.js`;
+	const targetPath = `./build/potree/shaders/shaders.js`;
 
-	if(!fs.existsSync("build/shaders")){
-		fs.mkdirSync("build/shaders");
+	if(!fs.existsSync("build/potree/shaders")){
+		fs.mkdirSync("build/potree/shaders");
 	}
 	fs.writeFileSync(targetPath, content, {flag: "w"});
 });
 
 gulp.task('build', 
 	gulp.series(
-		gulp.parallel("workers", "lazylibs", "shaders", "icons_viewer", "examples_page"),
+		gulp.parallel("workers", "lazylibs", "shaders"),
 		async function(done){
 			gulp.src(paths.html).pipe(gulp.dest('build/potree'));
 
@@ -172,22 +142,24 @@ gulp.task("pack", async function(){
 	});
 });
 
-gulp.task('watch', gulp.parallel("build", "pack", "webserver", async function() {
+gulp.task("add-import-header", function(){
+	const importHeader = 'import * as THREE from \'./libs/three.js/build/three.min.js\';\n' +
+		'import * as d3 from \'./libs/d3/d3.min.js\';\n' +
+		'import * as TWEEN from \'@tweenjs/tween.js\';\n' +
+		'import proj4 from \'proj4\';\n' +
+		'import {Shaders} from \'./shaders/shaders.js\';\n';
 
-	let watchlist = [
-		'src/**/*.js',
-		'src/**/**/*.js',
-		'src/**/*.css',
-		'src/**/*.html',
-		'src/**/*.vs',
-		'src/**/*.fs',
-		'resources/**/*',
-		'examples//**/*.json',
-		'!resources/icons/index.html',
-	];
+	return gulp.src('build/potree/potree.js')
+		.pipe(header(importHeader))
+		.pipe(gulp.dest('build/potree'))
+});
 
-	watch(watchlist, gulp.series("build", "pack"));
+gulp.task("minify", function(){
+	return gulp.src('build/potree/potree.js')
+		.pipe(uglify())
+		.pipe(rename('potree.min.js'))
+		.pipe(gulp.dest('build/potree'));
+});
 
-}));
-
-
+gulp.task("potree-package", gulp.series("build", "pack"));
+gulp.task("potree-compress", gulp.series("add-import-header", "minify"));

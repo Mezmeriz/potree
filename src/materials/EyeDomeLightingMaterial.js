@@ -1,5 +1,5 @@
 
-import {Shaders} from "../../build/shaders/shaders.js";
+import {Shaders} from "../../build/potree/shaders/shaders.js";
 
 //
 // Algorithm by Christian Boucheny

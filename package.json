@@ -7,8 +7,12 @@
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "gulp-connect": "^5.7.0",
+    "gulp-header": "^2.0.9",
+    "gulp-rename": "^2.0.0",
+    "gulp-uglify": "^3.0.2",
     "gulp-util": "^3.0.8",
-    "through": "~2.3.4"
+    "through": "~2.3.4",
+    "uglify-es": "^3.3.9"
   },
   "devDependencies": {
     "@tweenjs/tween.js": "^17.4.0"
