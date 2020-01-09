@@ -1,7 +1,8 @@
 import {ClipTask, ClipMethod} from "./defines";
 import {Box3Helper} from "./utils/Box3Helper";
 import BinaryHeap from '../libs/other/BinaryHeap';
-import {lru, nodes} from './Potree';
+import {lru} from './Potree.js';
+import {nodes} from './Nodes.js';
 
 let pointCloudTransformVersion = new Map();
 

@@ -3,7 +3,7 @@
 import {PointCloudTreeNode} from "./PointCloudTree.js";
 import {XHRFactory} from "./XHRFactory.js";
 import {Utils} from "./utils.js";
-import {nodes} from './Potree';
+import {nodes} from './Nodes.js';
 
 export class PointCloudOctreeGeometry{
 

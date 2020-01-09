@@ -2,7 +2,8 @@
 
 import {Version} from "../Version.js";
 import {XHRFactory} from "../XHRFactory.js";
-import {resourcePath, workerPool, nodes} from '../Potree.js';
+import {resourcePath, workerPool} from '../Potree.js';
+import {nodes} from '../Nodes.js';
 
 export class BinaryLoader{
 

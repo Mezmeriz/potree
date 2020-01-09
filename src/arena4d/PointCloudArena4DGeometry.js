@@ -1,7 +1,8 @@
 
 
 import {EventDispatcher} from "../EventDispatcher.js";
-import {nodes, PointAttribute, PointAttributes} from '../Potree.js';
+import {PointAttribute, PointAttributes} from '../Potree.js';
+import {nodes} from '../Nodes.js';
 import {XHRFactory} from '../XHRFactory.js';
 
 export class PointCloudArena4DGeometryNode{

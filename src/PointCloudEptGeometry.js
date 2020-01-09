@@ -4,7 +4,7 @@ import {Version} from './Version.js';
 import {EptLaszipLoader} from './loader/ept/LaszipLoader.js';
 import {EptZstandardLoader} from './loader/ept/ZstandardLoader.js';
 import {EptBinaryLoader} from './loader/ept/BinaryLoader.js';
-import {nodes} from './Potree.js';
+import {nodes} from './Nodes.js';
 
 
 class U {

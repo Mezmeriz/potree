@@ -2,7 +2,8 @@
 
 import {Version} from "../Version.js";
 import {XHRFactory} from "../XHRFactory.js";
-import {nodes, workerPool, scriptPath} from '../Potree.js';
+import {workerPool, scriptPath} from '../Potree.js';
+import {nodes} from '../Nodes.js';
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz

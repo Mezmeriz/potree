@@ -17,9 +17,6 @@ export let lru = new LRU();
 
 console.log('Potree ' + version.major + '.' + version.minor + version.suffix);
 
-export let numNodesLoading = 0;
-export let maxNodesLoading = 4;
-
 export const debug = {};
 
 let scriptPath = "";
@@ -35,22 +32,3 @@ if (document.currentScript.src) {
 let resourcePath = scriptPath + '/assets/potree';
 
 export {scriptPath, resourcePath};
-
-export class Nodes {
-	constructor () {
-		this.nodesLoading = 0;
-		this.maxNodesLoading = 4;
-	}
-
-	getNodesLoading() {
-		return this.nodesLoading;
-	}
-	incNodesLoading() {
-		this.nodesLoading++;
-	}
-	decNodesLoading() {
-		this.nodesLoading--;
-	}
-}
-
-export let nodes = new Nodes();
