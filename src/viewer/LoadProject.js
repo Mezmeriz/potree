@@ -24,7 +24,7 @@ function loadPointCloud(viewer, data){
 			return;
 		}
 
-		this.loadPointCloudData(data.url, data.name, (e) => {
+		loadPointCloudData(data.url, data.name, (e) => {
 			const {pointcloud} = e;
 
 			pointcloud.position.set(...data.position);
