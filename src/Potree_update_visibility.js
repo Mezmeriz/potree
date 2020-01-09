@@ -4,7 +4,7 @@ import BinaryHeap from '../libs/other/BinaryHeap';
 import {lru} from './Potree.js';
 import {nodes} from './Nodes.js';
 
-let pointCloudTransformVersion = new Map();
+let pointcloudTransformVersion = new Map();
 
 export function updatePointClouds(pointclouds, camera, renderer, pointBudget){
 
@@ -138,10 +138,10 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 
 		pointcloud.updateMatrixWorld();
 
-		if(!pointCloudTransformVersion.has(pointcloud)){
-			pointCloudTransformVersion.set(pointcloud, {number: 0, transform: pointcloud.matrixWorld.clone()});
+		if(!pointcloudTransformVersion.has(pointcloud)){
+			pointcloudTransformVersion.set(pointcloud, {number: 0, transform: pointcloud.matrixWorld.clone()});
 		}else{
-			let version = pointCloudTransformVersion.get(pointcloud);
+			let version = pointcloudTransformVersion.get(pointcloud);
 
 			if(!version.transform.equals(pointcloud.matrixWorld)){
 				version.number++;
@@ -301,7 +301,7 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 			if(node._transformVersion === undefined){
 				node._transformVersion = -1;
 			}
-			let transformVersion = pointCloudTransformVersion.get(pointcloud);
+			let transformVersion = pointcloudTransformVersion.get(pointcloud);
 			if(node._transformVersion !== transformVersion.number){
 				node.sceneNode.updateMatrix();
 				node.sceneNode.matrixWorld.multiplyMatrices(pointcloud.matrixWorld, node.sceneNode.matrix);	
