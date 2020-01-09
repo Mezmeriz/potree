@@ -110,7 +110,7 @@ export class Viewer extends EventDispatcher{
 		this.skybox = null;
 		this.clock = new THREE.Clock();
 		this.background = null;
-		this.pointBudget = 1 * 1000 * 1000;
+		this.pointBudget = 1000000;
 
 		this.initThree();
 
@@ -204,12 +204,12 @@ export class Viewer extends EventDispatcher{
 			this.setEDLOpacity(1.0);
 			this.setClipTask(ClipTask.HIGHLIGHT);
 			this.setClipMethod(ClipMethod.INSIDE_ANY);
-			this.setPointBudget(10*1000*1000);
+			this.setPointBudget(10000000);
 			this.setShowBoundingBox(false);
 			this.setFreeze(false);
 			this.setControls(this.fpControls);
-			this.setBackground('white');
-			this.useHQ = true;
+			this.setBackground('gradient');
+			this.useHQ = false;
 			this.scaleFactor = 1;
 		}
 
