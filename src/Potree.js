@@ -17,7 +17,6 @@ export let lru = new LRU();
 
 console.log('Potree ' + version.major + '.' + version.minor + version.suffix);
 
-export let framenumber = 0;
 export let numNodesLoading = 0;
 export let maxNodesLoading = 4;
 
