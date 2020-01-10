@@ -60,7 +60,7 @@ export class BinaryLoader{
 			node.numPoints = numPoints;
 		}
 
-		let workerPath = resourcePath + '/workers/BinaryDecoderWorker.js';
+		let workerPath = resourcePath + '/workers/BinaryDecoderWorker.min.js';
 		let worker = workerPool.getWorker(workerPath);
 
 		worker.onmessage = function (e) {

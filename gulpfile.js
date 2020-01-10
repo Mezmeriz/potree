@@ -154,12 +154,19 @@ gulp.task("add-import-header", function(){
 		.pipe(gulp.dest('build/potree'))
 });
 
-gulp.task("minify", function(){
+gulp.task("minify-potree", function(){
 	return gulp.src('build/potree/potree.js')
 		.pipe(uglify())
 		.pipe(rename('potree.min.js'))
 		.pipe(gulp.dest('build/potree'));
 });
 
+gulp.task("minify-worker", function(){
+	return gulp.src('build/potree/workers/BinaryDecoderWorker.js')
+		.pipe(uglify())
+		.pipe(rename('BinaryDecoderWorker.min.js'))
+		.pipe(gulp.dest('build/potree/workers'));
+});
+
 gulp.task("potree-package", gulp.series("build", "pack"));
-gulp.task("potree-compress", gulp.series("add-import-header", "minify"));
+gulp.task("potree-compress", gulp.series("add-import-header", "minify-potree", "minify-worker"));
