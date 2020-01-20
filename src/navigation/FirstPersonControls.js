@@ -121,7 +121,7 @@ export class FirstPersonControls extends EventDispatcher {
 		let pI = Mouse.getMousePhotosphereIntersection(mouse,
 			camera,
 			this.viewer,
-			this.scene.photoSpheres);
+			this.scene.photoSpheres.map(photoSpheres => photoSpheres.model));
 		let I = Mouse.getMousePointCloudIntersection(
 			mouse,
 			camera,
@@ -129,6 +129,8 @@ export class FirstPersonControls extends EventDispatcher {
 			this.scene.pointclouds);
 
 		if (pI !== null) {
+			this.scene.loadPhotoSphereTexture(pI.uuid);
+
 			let cameraTargetPosition = pI.location;
 			let animationDuration = 600;
 			let easing = TWEEN.Easing.Quartic.Out;

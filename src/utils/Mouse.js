@@ -69,7 +69,10 @@ export class Mouse {
         const intersects = raycaster.intersectObjects(photoSpheres, true);
 
         if (intersects.length > 0) {
-            return {location: intersects[0].object.position};
+            return {
+                location: intersects[0].object.position,
+                uuid: intersects[0].object.uuid
+            };
         } else {
             return null;
         }

@@ -120,9 +120,53 @@ export class Scene extends EventDispatcher{
 		return box;
 	}
 
-	addPhotoSphere(photoSphere) {
-		this.photoSpheres.push(photoSphere);
-		this.scene.add(photoSphere);
+	loadPhotoSphereTexture(uuid) {
+		const photoSphere = this.photoSpheres.find(photoSphere => photoSphere.model.uuid === uuid);
+		if (!photoSphere.textureLoaded) {
+			const textureLoader = new THREE.TextureLoader();
+			textureLoader.crossOrigin = 'use-credentials';
+			textureLoader.load(photoSphere.textureUrl,
+				(texture) => {
+					const material = new THREE.MeshBasicMaterial({map: texture});
+					photoSphere.model.material = material;
+					photoSphere.textureLoaded = true;
+				},
+				null,
+				(err) => {
+					console.log(`An error eccurred: ${err}`);
+				})
+		}
+	}
+
+	showPhotoSphere(photoSphere, show) {
+		if (!photoSphere.textureLoaded) {
+			const material = new THREE.MeshPhongMaterial({
+				transparent: true,
+				opacity: 0.15,
+				color: 0xFFFFFF
+			});
+			if (show) {
+				material.opacity = 0.5;
+				material.color = new THREE.Color(0x6DA4EE);
+			}
+
+			photoSphere.model.material = material;
+		}
+	}
+
+	addPhotoSphere(photoSphere, textureUrl) {
+
+		const sphere = {
+			model: photoSphere,
+			textureUrl: textureUrl,
+			textureLoaded: false
+		};
+
+		sphere.model.addEventListener('mouseover', () => this.showPhotoSphere(sphere, true));
+		sphere.model.addEventListener('mouseleave', () => this.showPhotoSphere(sphere, false));
+
+		this.photoSpheres.push(sphere);
+		this.scene.add(sphere.model);
 	}
 
 	addAllPhotospheres(){
