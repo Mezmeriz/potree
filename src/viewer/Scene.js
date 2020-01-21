@@ -133,7 +133,7 @@ export class Scene extends EventDispatcher{
 				},
 				null,
 				(err) => {
-					console.log(`An error eccurred: ${err}`);
+					console.log(`An error occurred: ${err}`);
 				})
 		}
 	}
@@ -167,6 +167,10 @@ export class Scene extends EventDispatcher{
 
 		this.photoSpheres.push(sphere);
 		this.scene.add(sphere.model);
+		this.dispatchEvent({
+			type: 'photosphere_added',
+			photosphere: sphere
+		});
 	}
 
 	addAllPhotospheres(){
@@ -175,6 +179,10 @@ export class Scene extends EventDispatcher{
 
 	removePhotosphere(photoSphere) {
 		this.scene.remove(photoSphere)
+		this.dispatchEvent({
+			type: 'photosphere_removed',
+			photosphere: photoSphere
+		});
 	}
 
 	removeAllPhotospheres(){
@@ -182,11 +190,20 @@ export class Scene extends EventDispatcher{
 	}
 
 	addMesh(mesh) {
+		mesh.material.transparent = true;
 		this.scene.add(mesh);
+		this.dispatchEvent( {
+			type: 'mesh_added',
+			mesh: mesh
+		});
 	}
 
 	removeMesh(mesh) {
 		this.scene.remove(mesh);
+		this.dispatchEvent({
+			type: 'mesh_removed',
+			mesh: mesh
+		});
 	}
 
 	addPointCloud (pointcloud) {
