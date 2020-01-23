@@ -2,6 +2,7 @@
 
 import {MouseButtons} from "../defines.js";
 import {Mouse} from '../utils/Mouse.js';
+import {Calc} from '../utils/Calc.js'
 import {EventDispatcher} from "../EventDispatcher.js";
 
 export class EarthControls extends EventDispatcher {
@@ -273,7 +274,7 @@ export class EarthControls extends EventDispatcher {
 			let distance = this.pivotIndicator.position.distanceTo(view.position);
 			let pixelwidth = this.renderer.domElement.clientwidth;
 			let pixelHeight = this.renderer.domElement.clientHeight;
-			let pr = Utils.projectedRadius(1, camera, distance, pixelwidth, pixelHeight);
+			let pr = Calc.projectedRadius(1, camera, distance, pixelwidth, pixelHeight);
 			let scale = (10 / pr);
 			this.pivotIndicator.scale.set(scale, scale, scale);
 		}

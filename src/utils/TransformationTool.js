@@ -2,6 +2,7 @@
 
 import {resourcePath} from "../Potree.js";
 import {Utils} from '../utils.js';
+import {Calc} from '../utils/Calc.js';
 
 export class TransformationTool {
 	constructor(viewer) {
@@ -764,7 +765,7 @@ export class TransformationTool {
 
 					let handlePos = node.getWorldPosition(new THREE.Vector3());
 					let distance = handlePos.distanceTo(camera.position);
-					let pr = Utils.projectedRadius(1, camera, distance, domElement.clientWidth, domElement.clientHeight);
+					let pr = Calc.projectedRadius(1, camera, distance, domElement.clientWidth, domElement.clientHeight);
 
 					let ws = node.parent.getWorldScale(new THREE.Vector3());
 

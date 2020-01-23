@@ -8,6 +8,7 @@ import {Scene} from "./Scene.js";
 import {ClippingTool} from "../utils/ClippingTool.js";
 import {TransformationTool} from "../utils/TransformationTool.js";
 import {Utils} from "../utils.js";
+import {Calc} from '../utils/Calc.js';
 import {ProfileWindow, ProfileWindowController} from "./profile.js";
 import {BoxVolume} from "../utils/Volume.js";
 import {Features} from "../Features.js";
@@ -1154,7 +1155,7 @@ export class Viewer extends EventDispatcher{
 					let projFactor =  0.5 * renderAreaSize.y / (slope * distance);
 					screenSize = radius * projFactor;
 				} else {
-					screenSize = Utils.projectedRadiusOrtho(radius, viewer.scene.cameraO.projectionMatrix, renderAreaSize.x, renderAreaSize.y);
+					screenSize = Calc.projectedRadiusOrtho(radius, viewer.scene.cameraO.projectionMatrix, renderAreaSize.x, renderAreaSize.y);
 				}
 			}
 
