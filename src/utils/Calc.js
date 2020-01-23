@@ -52,7 +52,7 @@ export class Calc {
         const P2 = ac_origin;
         const P3 = ac_origin.clone().add(ac_dir);
 
-        const center = Utils.lineToLineIntersection(P0, P1, P2, P3);
+        const center = this.lineToLineIntersection(P0, P1, P2, P3);
 
         return center;
 
