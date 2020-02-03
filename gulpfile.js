@@ -120,21 +120,6 @@ gulp.task("shaders", async function(){
 	fs.writeFileSync(targetPath, content, {flag: "w"});
 });
 
-gulp.task('build', 
-	gulp.series(
-		gulp.parallel("workers", "lazylibs", "shaders"),
-		async function(done){
-			gulp.src(paths.html).pipe(gulp.dest('build/potree'));
-
-			gulp.src(paths.resources).pipe(gulp.dest('build/potree/resources'));
-
-			gulp.src(["LICENSE"]).pipe(gulp.dest('build/potree'));
-
-			done();
-		}
-	)
-);
-
 gulp.task("pack", async function(){
 	exec('rollup -c', function (err, stdout, stderr) {
 		console.log(stdout);
@@ -168,5 +153,17 @@ gulp.task("minify-worker", function(){
 		.pipe(gulp.dest('build/potree/workers'));
 });
 
-gulp.task("potree-package", gulp.series("build", "pack"));
-gulp.task("potree-compress", gulp.series("add-import-header", "minify-potree", "minify-worker"));
+gulp.task("minify", gulp.series("add-import-header", "minify-potree", "minify-worker"));
+
+gulp.task('build',
+	gulp.series(
+		gulp.parallel("workers", "lazylibs", "shaders", "pack"),
+		async function(done){
+			gulp.src(paths.html).pipe(gulp.dest('build/potree'));
+			gulp.src(paths.resources).pipe(gulp.dest('build/potree/resources'));
+			gulp.src(["LICENSE"]).pipe(gulp.dest('build/potree'));
+			done();
+		},
+		"minify"
+	)
+);
