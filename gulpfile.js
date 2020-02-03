@@ -1,8 +1,8 @@
 
 const path = require('path');
 const gulp = require('gulp');
-const exec = require('child_process').exec;
-
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 const fs = require("fs");
 const fsp = fs.promises;
 const concat = require('gulp-concat');
@@ -23,6 +23,12 @@ let paths = {
 	],
 	resources: [
 		"resources/**/*"
+	],
+	libs: [
+		"libs/three.js/build/three.min.js",
+		"libs/d3/d3.min.js",
+		"libs/proj4/proj4.js",
+		"libs/tween/tween.min.js"
 	]
 };
 
@@ -73,7 +79,7 @@ gulp.task("workers", async function(done){
 
 		gulp.src(workers[workerName])
 			.pipe(concat(`${workerName}.js`))
-			.pipe(gulp.dest('build/potree/workers'));
+			.pipe(gulp.dest('build/workers'));
 	}
 
 	done();
@@ -86,7 +92,7 @@ gulp.task("lazylibs", async function(done){
 		const libpath = lazyLibs[libname];
 
 		gulp.src([`${libpath}/**/*`])
-			.pipe(gulp.dest(`build/potree/lazylibs/${libname}`));
+			.pipe(gulp.dest(`build/lazylibs/${libname}`));
 	}
 
 	done();
@@ -112,45 +118,46 @@ gulp.task("shaders", async function(){
 
 	const content = components.join("\n\n");
 
-	const targetPath = `./build/potree/shaders/shaders.js`;
+	const targetPath = `./build/shaders/shaders.js`;
 
-	if(!fs.existsSync("build/potree/shaders")){
-		fs.mkdirSync("build/potree/shaders");
+	if(!fs.existsSync("build/shaders")){
+		fs.mkdirSync("build/shaders");
 	}
 	fs.writeFileSync(targetPath, content, {flag: "w"});
 });
 
-gulp.task("pack", async function(){
-	exec('rollup -c', function (err, stdout, stderr) {
+gulp.task("pack", async function(done){
+	await exec('rollup -c', function (err, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);
+		done();
 	});
 });
 
 gulp.task("add-import-header", function(){
-	const importHeader = 'import * as THREE from \'./libs/three.js/build/three.min.js\';\n' +
-		'import * as d3 from \'./libs/d3/d3.min.js\';\n' +
-		'import * as TWEEN from \'@tweenjs/tween.js\';\n' +
-		'import proj4 from \'proj4\';\n' +
+	const importHeader = 'import * as THREE from \'./libs/three.min.js\';\n' +
+		'import * as d3 from \'./libs/d3.min.js\';\n' +
+		'import * as TWEEN from \'./libs/tween.min.js\';\n' +
+		'import proj4 from \'./libs/proj4.js\';\n' +
 		'import {Shaders} from \'./shaders/shaders.js\';\n';
 
-	return gulp.src('build/potree/potree.js')
+	return gulp.src('build/potree.js')
 		.pipe(header(importHeader))
-		.pipe(gulp.dest('build/potree'))
+		.pipe(gulp.dest('build'))
 });
 
 gulp.task("minify-potree", function(){
-	return gulp.src('build/potree/potree.js')
+	return gulp.src('build/potree.js')
 		.pipe(uglify())
 		.pipe(rename('potree.min.js'))
-		.pipe(gulp.dest('build/potree'));
+		.pipe(gulp.dest('build/'));
 });
 
 gulp.task("minify-worker", function(){
-	return gulp.src('build/potree/workers/BinaryDecoderWorker.js')
+	return gulp.src('build/workers/BinaryDecoderWorker.js')
 		.pipe(uglify())
 		.pipe(rename('BinaryDecoderWorker.min.js'))
-		.pipe(gulp.dest('build/potree/workers'));
+		.pipe(gulp.dest('build/workers'));
 });
 
 gulp.task("minify", gulp.series("add-import-header", "minify-potree", "minify-worker"));
@@ -159,9 +166,10 @@ gulp.task('build',
 	gulp.series(
 		gulp.parallel("workers", "lazylibs", "shaders", "pack"),
 		async function(done){
-			gulp.src(paths.html).pipe(gulp.dest('build/potree'));
-			gulp.src(paths.resources).pipe(gulp.dest('build/potree/resources'));
-			gulp.src(["LICENSE"]).pipe(gulp.dest('build/potree'));
+			gulp.src(paths.html).pipe(gulp.dest('build'));
+			gulp.src(paths.libs).pipe(gulp.dest('build/libs'));
+			gulp.src(paths.resources).pipe(gulp.dest('build/resources'));
+			gulp.src(["LICENSE"]).pipe(gulp.dest('build'));
 			done();
 		},
 		"minify"

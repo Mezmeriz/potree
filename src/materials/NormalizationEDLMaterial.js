@@ -1,6 +1,6 @@
 
 
-import {Shaders} from "../../build/potree/shaders/shaders.js";
+import {Shaders} from "../../build/shaders/shaders.js";
 
 
 export class NormalizationEDLMaterial extends THREE.RawShaderMaterial{

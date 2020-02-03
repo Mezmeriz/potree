@@ -1,7 +1,7 @@
 
 // see http://john-chapman-graphics.blogspot.co.at/2013/01/ssao-tutorial.html
 
-import {Shaders} from "../../build/potree/shaders/shaders.js";
+import {Shaders} from "../../build/shaders/shaders.js";
 
 export class BlurMaterial extends THREE.ShaderMaterial{
 
