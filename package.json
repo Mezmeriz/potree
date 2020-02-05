@@ -11,6 +11,7 @@
     "gulp-rename": "^2.0.0",
     "gulp-uglify": "^3.0.2",
     "gulp-util": "^3.0.8",
+    "rimraf": "^3.0.1",
     "through": "~2.3.4",
     "uglify-es": "^3.3.9"
   },
