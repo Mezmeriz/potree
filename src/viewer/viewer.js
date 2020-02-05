@@ -30,7 +30,7 @@ import { EventDispatcher } from "../EventDispatcher.js";
 import { ClassificationScheme } from "../materials/ClassificationScheme.js";
 
 import {updatePointClouds} from '../Potree_update_visibility';
-import {debug, lru, scriptPath, resourcePath} from '../Potree.js';
+import {debug, lru, resourcePath} from '../Potree.js';
 
 export class Viewer extends EventDispatcher{
 	
@@ -943,8 +943,7 @@ export class Viewer extends EventDispatcher{
 	loadGUI(callback){
 
 		this.onGUILoaded(callback);
-
-		let elProfile = $('<div>').load(new URL(scriptPath + '/assets/potree/profile.html').href, () => {
+		let elProfile = $('<div>').load(new URL(resourcePath + '/profile.html').href, () => {
 			$(document.body).append(elProfile.children());
 			this.profileWindow = new ProfileWindow(this);
 			this.profileWindowController = new ProfileWindowController(this);

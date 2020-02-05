@@ -29,6 +29,6 @@ if (document.currentScript.src) {
 	console.error('Potree was unable to find its script path using document.currentScript. Is Potree included with a script tag? Does your browser support this function?');
 }
 
-let resourcePath = scriptPath + '/assets/potree';
+let resourcePath = scriptPath + '/app/services/potree/resources'; //TODO - This is ewy. Should be defined by project using this library instead.
 
 export {scriptPath, resourcePath};

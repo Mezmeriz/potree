@@ -102,10 +102,10 @@ gulp.task("minify-potree", function () {
 });
 
 gulp.task("minify-worker", function () {
-    return gulp.src('build/workers/BinaryDecoderWorker.js')
+    return gulp.src('build/resources/workers/BinaryDecoderWorker.js')
         .pipe(uglify())
         .pipe(rename('BinaryDecoderWorker.min.js'))
-        .pipe(gulp.dest('build/workers'));
+        .pipe(gulp.dest('build/resources/workers'));
 });
 
 gulp.task("minify", gulp.series("add-import-header", "minify-potree", "minify-worker"));
@@ -115,7 +115,7 @@ gulp.task('build',
         "dirSetup",
         gulp.parallel("shaders", "pack"),
         async function (done) {
-            gulp.src(paths.html).pipe(gulp.dest('build'));
+            gulp.src(paths.html).pipe(gulp.dest('build/resources'));
             gulp.src(paths.libs).pipe(gulp.dest('build/libs'));
             gulp.src(paths.resources).pipe(gulp.dest('build/resources'));
             gulp.src(["LICENSE"]).pipe(gulp.dest('build'));
