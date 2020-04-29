@@ -32,7 +32,10 @@ import { EventDispatcher } from "../EventDispatcher.js";
 import { ClassificationScheme } from "../materials/ClassificationScheme.js";
 
 import {updatePointClouds} from '../Potree_update_visibility';
-import {debug, lru, resourcePath} from '../Potree.js';
+import {loadProject} from './LoadProject.js'
+import {saveProject} from './SaveProject.js'
+import {GeoPackageLoader} from '../loader/GeoPackageLoader.js'
+import {debug, lru, resourcePath, scriptPath} from '../Potree.js';
 
 export class Viewer extends EventDispatcher{
 	
@@ -905,14 +908,14 @@ export class Viewer extends EventDispatcher{
 		// const json = JSON.parse(text);
 
 		if(json.type === "Potree"){
-			Potree.loadProject(viewer, json);
+			loadProject(viewer, json);
 		}
 
 		//Potree.loadProject(this, url);
 	}
 
 	saveProject(){
-		return Potree.saveProject(this);
+		return saveProject(this);
 	}
 	
 	loadSettingsFromURL(){
@@ -1080,17 +1083,17 @@ export class Viewer extends EventDispatcher{
 
 		let viewer = this;
 		let sidebarContainer = $('#potree_sidebar_container');
-		sidebarContainer.load(new URL(Potree.scriptPath + '/sidebar.html').href, () => {
+		sidebarContainer.load(new URL(scriptPath + '/sidebar.html').href, () => {
 			sidebarContainer.css('width', '300px');
 			sidebarContainer.css('height', '100%');
 
 			let imgMenuToggle = document.createElement('img');
-			imgMenuToggle.src = new URL(Potree.resourcePath + '/icons/menu_button.svg').href;
+			imgMenuToggle.src = new URL(resourcePath + '/icons/menu_button.svg').href;
 			imgMenuToggle.onclick = this.toggleSidebar;
 			imgMenuToggle.classList.add('potree_menu_toggle');
 
 			let imgMapToggle = document.createElement('img');
-			imgMapToggle.src = new URL(Potree.resourcePath + '/icons/map_icon.png').href;
+			imgMapToggle.src = new URL(resourcePath + '/icons/map_icon.png').href;
 			imgMapToggle.style.display = 'none';
 			imgMapToggle.onclick = e => { this.toggleMap(); };
 			imgMapToggle.id = 'potree_map_toggle';
@@ -1103,7 +1106,7 @@ export class Viewer extends EventDispatcher{
 
 			i18n.init({
 				lng: 'en',
-				resGetPath: Potree.resourcePath + '/lang/__lng__/__ns__.json',
+				resGetPath: resourcePath + '/lang/__lng__/__ns__.json',
 				preload: ['en', 'fr', 'de', 'jp', 'se', 'es'],
 				getAsync: true,
 				debug: false
@@ -1189,7 +1192,7 @@ export class Viewer extends EventDispatcher{
 						const json = JSON.parse(text);
 
 						if(json.type === "Potree"){
-							Potree.loadProject(viewer, json);
+							loadProject(viewer, json);
 						}
 					}catch(e){
 						console.error("failed to parse the dropped file as JSON");
@@ -1215,7 +1218,7 @@ export class Viewer extends EventDispatcher{
 							source: file.name,
 						};
 						
-						const geo = await Potree.GeoPackageLoader.loadBuffer(buffer, params);
+						const geo = await GeoPackageLoader.loadBuffer(buffer, params);
 						viewer.scene.addGeopackage(geo);
 					}
 				}

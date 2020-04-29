@@ -1,3 +1,4 @@
+import {nodes} from '../../Nodes.js'
 
 export class OctreeGeometry{
 
@@ -72,13 +73,13 @@ export class OctreeGeometryNode{
 	}
 
 	load(){
-		if (this.loading === true || this.loaded === true || Potree.numNodesLoading >= Potree.maxNodesLoading) {
+		if (this.loading === true || this.loaded === true || nodes.nodesLoading >= nodes.maxNodesLoading) {
 			return;
 		}
 
 		this.loading = true;
 
-		Potree.numNodesLoading++;
+		nodes.incNodesLoading()
 
 		this.loadPoints();
 	}

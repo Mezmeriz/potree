@@ -5,7 +5,7 @@ import {Utils} from "./utils.js";
 import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
 import {ProfileRequest} from './ProfileRequest';
 import {debug} from './Potree';
-import {ClipTask} from './defines';
+import {ClipTask, PointShape} from './defines';
 
 export class PointCloudOctreeNode extends PointCloudTreeNode {
 	constructor () {
@@ -789,7 +789,7 @@ export class PointCloudOctree extends PointCloudTree {
 		{ // update pick material
 			pickMaterial.pointSizeType = pointSizeType;
 			//pickMaterial.shape = this.material.shape;
-			pickMaterial.shape = Potree.PointShape.PARABOLOID;
+			pickMaterial.shape = PointShape.PARABOLOID;
 
 			pickMaterial.uniforms.uFilterReturnNumberRange.value = this.material.uniforms.uFilterReturnNumberRange.value;
 			pickMaterial.uniforms.uFilterNumberOfReturnsRange.value = this.material.uniforms.uFilterNumberOfReturnsRange.value;

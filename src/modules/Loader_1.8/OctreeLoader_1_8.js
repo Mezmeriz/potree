@@ -1,6 +1,8 @@
 
 import {PointAttribute, PointAttributes, PointAttributeTypes} from "../../loader/PointAttributes.js";
 import {OctreeGeometry, OctreeGeometryNode} from "./OctreeGeometry.js";
+import {scriptPath, workerPool} from '../../Potree.js'
+import {nodes} from '../../Nodes.js'
 
 export class NodeLoader{
 
@@ -25,15 +27,15 @@ export class NodeLoader{
 				},
 			});
 
-			let workerPath = Potree.scriptPath + '/workers/OctreeDecoderWorker.js';
-			let worker = Potree.workerPool.getWorker(workerPath);
+			let workerPath = scriptPath + '/workers/OctreeDecoderWorker.js';
+			let worker = workerPool.getWorker(workerPath);
 
 			worker.onmessage = function (e) {
 
 				let data = e.data;
 				let buffers = data.attributeBuffers;
 
-				Potree.workerPool.returnWorker(workerPath, worker);
+				workerPool.returnWorker(workerPath, worker);
 
 
 				let geometry = new THREE.BufferGeometry();
@@ -58,7 +60,8 @@ export class NodeLoader{
 				node.geometry = geometry;
 				node.loaded = true;
 				node.loading = false;
-				Potree.numNodesLoading--;
+
+				nodes.numNodesLoading--;
 			};
 
 			let buffer = await response.arrayBuffer();
