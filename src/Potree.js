@@ -22,11 +22,12 @@ if (document.currentScript.src) {
 	if (scriptPath.slice(-1) === '/') {
 		scriptPath = scriptPath.slice(0, -1);
 	}
-} else if(import.meta){
-	scriptPath = new URL(import.meta.url + "/..").href;
-	if (scriptPath.slice(-1) === '/') {
-		scriptPath = scriptPath.slice(0, -1);
-	}
+	// TODO - Figure out why 'import.meta' causes error
+// } else if(import.meta){
+// 	scriptPath = new URL(import.meta.url + "/..").href;
+// 	if (scriptPath.slice(-1) === '/') {
+// 		scriptPath = scriptPath.slice(0, -1);
+// 	}
 }else {
 	console.error('Potree was unable to find its script path using document.currentScript. Is Potree included with a script tag? Does your browser support this function?');
 }
