@@ -123,9 +123,9 @@ export class Calc {
 
     static projectedRadius(radius, camera, distance, screenWidth, screenHeight){
         if(camera instanceof THREE.OrthographicCamera){
-            return Utils.projectedRadiusOrtho(radius, camera.projectionMatrix, screenWidth, screenHeight);
+            return Calc.projectedRadiusOrtho(radius, camera.projectionMatrix, screenWidth, screenHeight);
         }else if(camera instanceof THREE.PerspectiveCamera){
-            return Utils.projectedRadiusPerspective(radius, camera.fov * Math.PI / 180, distance, screenHeight);
+            return Calc.projectedRadiusPerspective(radius, camera.fov * Math.PI / 180, distance, screenHeight);
         }else{
             throw new Error("invalid parameters");
         }
