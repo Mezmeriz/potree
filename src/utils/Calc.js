@@ -84,7 +84,7 @@ export class Calc {
         }else{
             // if there is no projection, assume [0, 1, 0] as north direction
 
-            const vec = p1.clone.add(new THREE.Vector3(0, 1, 0).multiplyScalar(distance));
+            const vec = p1.clone().add(new THREE.Vector3(0, 1, 0).multiplyScalar(distance));
 
             return vec;
         }
@@ -123,9 +123,9 @@ export class Calc {
 
     static projectedRadius(radius, camera, distance, screenWidth, screenHeight){
         if(camera instanceof THREE.OrthographicCamera){
-            return this.projectedRadiusOrtho(radius, camera.projectionMatrix, screenWidth, screenHeight);
+            return Utils.projectedRadiusOrtho(radius, camera.projectionMatrix, screenWidth, screenHeight);
         }else if(camera instanceof THREE.PerspectiveCamera){
-            return this.projectedRadiusPerspective(radius, camera.fov * Math.PI / 180, distance, screenHeight);
+            return Utils.projectedRadiusPerspective(radius, camera.fov * Math.PI / 180, distance, screenHeight);
         }else{
             throw new Error("invalid parameters");
         }

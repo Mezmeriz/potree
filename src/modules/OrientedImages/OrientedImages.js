@@ -1,10 +1,9 @@
 
-import {TextSprite} from "../../TextSprite.js";
+
 import {resourcePath} from '../../Potree.js'
 import {OrientedImageControls} from "./OrientedImageControls.js";
 import { EventDispatcher } from "../../EventDispatcher.js";
 import {PolygonClipVolume} from '../../utils/PolygonClipVolume';
-
 // https://support.pix4d.com/hc/en-us/articles/205675256-How-are-yaw-pitch-roll-defined
 // https://support.pix4d.com/hc/en-us/articles/202558969-How-are-omega-phi-kappa-defined
 
@@ -42,15 +41,83 @@ function createMaterial(){
 			// resolution: { value: new THREE.Vector2() }
 			tColor: {value: new THREE.Texture() },
 			uNear: {value: 0.0},
-			uOpacity: {value: 0.5},
+			uOpacity: {value: 1.0},
 		},
 		vertexShader: vertexShader,
 		fragmentShader: fragmentShader,
 		side: THREE.DoubleSide,
 	} );
+
 	material.side = THREE.DoubleSide;
 	return material;
 }
+
+const planeGeometry = new THREE.PlaneGeometry(1, 1);
+const lineGeometry = new THREE.Geometry();
+
+lineGeometry.vertices.push(
+	new THREE.Vector3(-0.5, -0.5, 0),
+	new THREE.Vector3( 0.5, -0.5, 0),
+	new THREE.Vector3( 0.5,  0.5, 0),
+	new THREE.Vector3(-0.5,  0.5, 0),
+	new THREE.Vector3(-0.5, -0.5, 0),
+);
+
+export class OrientedImage{
+
+	constructor(id){
+
+		this.id = id;
+		this.fov = 1.0;
+		this.position = new THREE.Vector3();
+		this.rotation = new THREE.Vector3();
+		this.width = 0;
+		this.height = 0;
+		this.fov = 1.0;
+
+		const material = createMaterial();
+		const lineMaterial = new THREE.LineBasicMaterial( { color: 0x00ff00 } );
+		this.mesh = new THREE.Mesh(planeGeometry, material);
+		this.line = new THREE.Line(lineGeometry, lineMaterial);
+		this.texture = null;
+
+		this.mesh.orientedImage = this;
+	}
+
+	set(position, rotation, dimension, fov){
+
+		let radians = rotation.map(THREE.Math.degToRad);
+
+		this.position.set(...position);
+		this.mesh.position.set(...position);
+
+		this.rotation.set(...radians);
+		this.mesh.rotation.set(...radians);
+
+		[this.width, this.height] = dimension;
+		this.mesh.scale.set(this.width / this.height, 1, 1);
+
+		this.fov = fov;
+
+		this.updateTransform();
+	}
+
+	updateTransform(){
+		let {mesh, line, fov} = this;
+
+		mesh.updateMatrixWorld();
+		const dir = mesh.getWorldDirection();
+		const alpha = THREE.Math.degToRad(fov / 2);
+		const d = -0.5 / Math.tan(alpha);
+		const move = dir.clone().multiplyScalar(d);
+		mesh.position.add(move);
+
+		line.position.copy(mesh.position);
+		line.scale.copy(mesh.scale);
+		line.rotation.copy(mesh.rotation);
+	}
+
+};
 
 export class OrientedImages extends EventDispatcher{
 
@@ -102,7 +169,7 @@ export class OrientedImageLoader{
 		const f = parseFloat(doc.getElementsByTagName("f")[0].textContent);
 
 		let a = (height / 2)  / f;
-		let fov = 2 * THREE.Math.radToDeg(Math.atan(a))
+		let fov = 2 * THREE.Math.radToDeg(Math.atan(a));
 
 		const params = {
 			path: path,
@@ -157,6 +224,9 @@ export class OrientedImageLoader{
 			imageParams.push(params);
 		}
 
+		// debug
+		//return [imageParams[50]];
+
 		return imageParams;
 	}
 
@@ -175,16 +245,16 @@ export class OrientedImageLoader{
 		const tEnd = performance.now();
 		console.log(tEnd - tStart);
 
-		const sp = new THREE.PlaneGeometry(1, 1);
-		const lg = new THREE.Geometry();
+		// const sp = new THREE.PlaneGeometry(1, 1);
+		// const lg = new THREE.Geometry();
 
-		lg.vertices.push(
-			new THREE.Vector3(-0.5, -0.5, 0),
-			new THREE.Vector3( 0.5, -0.5, 0),
-			new THREE.Vector3( 0.5,  0.5, 0),
-			new THREE.Vector3(-0.5,  0.5, 0),
-			new THREE.Vector3(-0.5, -0.5, 0),
-		);
+		// lg.vertices.push(
+		// 	new THREE.Vector3(-0.5, -0.5, 0),
+		// 	new THREE.Vector3( 0.5, -0.5, 0),
+		// 	new THREE.Vector3( 0.5,  0.5, 0),
+		// 	new THREE.Vector3(-0.5,  0.5, 0),
+		// 	new THREE.Vector3(-0.5, -0.5, 0),
+		// );
 
 		const {width, height} = cameraParams;
 		const orientedImages = [];
@@ -193,42 +263,44 @@ export class OrientedImageLoader{
 
 		for(const params of imageParams){
 
-			const material = createMaterial();
-			const lm = new THREE.LineBasicMaterial( { color: 0x00ff00 } );
-			const mesh = new THREE.Mesh(sp, material);
+			// const material = createMaterial();
+			// const lm = new THREE.LineBasicMaterial( { color: 0x00ff00 } );
+			// const mesh = new THREE.Mesh(sp, material);
 
 			const {x, y, z, omega, phi, kappa} = params;
-			const [rx, ry, rz] = [omega, phi, kappa]
-				.map(THREE.Math.degToRad);
+			// const [rx, ry, rz] = [omega, phi, kappa]
+			// 	.map(THREE.Math.degToRad);
 			
-			mesh.position.set(x, y, z);
-			mesh.scale.set(width / height, 1, 1);
-			mesh.rotation.set(rx, ry, rz);
-			{
-				mesh.updateMatrixWorld();
-				const dir = mesh.getWorldDirection();
-				const alpha = THREE.Math.degToRad(cameraParams.fov / 2);
-				const d = -0.5 / Math.tan(alpha);
-				const move = dir.clone().multiplyScalar(d);
-				mesh.position.add(move);
-			}
-			sceneNode.add(mesh);
-			material.uniforms.uOpacity.value = 1.0;
+			// mesh.position.set(x, y, z);
+			// mesh.scale.set(width / height, 1, 1);
+			// mesh.rotation.set(rx, ry, rz);
+			// {
+			// 	mesh.updateMatrixWorld();
+			// 	const dir = mesh.getWorldDirection();
+			// 	const alpha = THREE.Math.degToRad(cameraParams.fov / 2);
+			// 	const d = -0.5 / Math.tan(alpha);
+			// 	const move = dir.clone().multiplyScalar(d);
+			// 	mesh.position.add(move);
+			// }
+			// sceneNode.add(mesh);
 
-			const line = new THREE.Line(lg, lm);
-			line.position.copy(mesh.position);
-			line.scale.copy(mesh.scale);
-			line.rotation.copy(mesh.rotation);
-			sceneNode.add(line);
+			// const line = new THREE.Line(lg, lm);
+			// line.position.copy(mesh.position);
+			// line.scale.copy(mesh.scale);
+			// line.rotation.copy(mesh.rotation);
+			// sceneNode.add(line);
 
-			const orientedImage = {
-				mesh: mesh,
-				texture: null,
-				line: line,
-				params: params,
-				dimension:  [cameraParams.width, cameraParams.height],
-			};
-			mesh.orientedImage = orientedImage;
+			let orientedImage = new OrientedImage(params.id);
+			// orientedImage.setPosition(x, y, z);
+			// orientedImage.setRotation(omega, phi, kappa);
+			// orientedImage.setDimension(width, height);
+			let position = [x, y, z];
+			let rotation = [omega, phi, kappa];
+			let dimension = [width, height];
+			orientedImage.set(position, rotation, dimension, cameraParams.fov);
+
+			sceneNode.add(orientedImage.mesh);
+			sceneNode.add(orientedImage.line);
 			
 			orientedImages.push(orientedImage);
 		}
@@ -322,6 +394,45 @@ export class OrientedImageLoader{
 			//console.log(tEnd - tStart);
 		};
 
+		const moveToImage = (image) => {
+			console.log("move to image " + image.id);
+
+			const mesh = image.mesh;
+			const newCamPos = image.position.clone();
+			const newCamTarget = mesh.position.clone();
+
+			viewer.scene.view.setView(newCamPos, newCamTarget, 500, () => {
+				orientedImageControls.capture(image);
+			});
+
+			if(image.texture === null){
+
+				const target = image;
+
+				const tmpImagePath = `${Potree.resourcePath}/images/loading.jpg`;
+				new THREE.TextureLoader().load(tmpImagePath,
+					(texture) => {
+						if(target.texture === null){
+							target.texture = texture;
+							target.mesh.material.uniforms.tColor.value = texture;
+							mesh.material.needsUpdate = true;
+						}
+					}
+				);
+
+				const imagePath = `${imageParamsPath}/../${target.id}`;
+				new THREE.TextureLoader().load(imagePath,
+					(texture) => {
+						target.texture = texture;
+						target.mesh.material.uniforms.tColor.value = texture;
+						mesh.material.needsUpdate = true;
+					}
+				);
+				
+
+			}
+		};
+
 		const onMouseClick = (evt) => {
 
 			if(orientedImageControls.hasSomethingCaptured()){
@@ -329,48 +440,7 @@ export class OrientedImageLoader{
 			}
 
 			if(hoveredElement){
-				console.log("move to image " + hoveredElement.params.id);
-
-				const mesh = hoveredElement.mesh;
-				const newCamPos = new THREE.Vector3( 
-					hoveredElement.params.x,
-					hoveredElement.params.y,
-					hoveredElement.params.z
-				);
-				const newCamTarget = mesh.position.clone();
-
-				viewer.scene.view.setView(newCamPos, newCamTarget, 500, () => {
-					orientedImageControls.capture(hoveredElement.params);
-				});
-
-				if(hoveredElement.texture === null){
-
-					const target = hoveredElement;
-
-					const tmpImagePath = `${resourcePath}/images/loading.jpg`;
-					new THREE.TextureLoader().load(tmpImagePath,
-						(texture) => {
-							if(target.texture === null){
-								target.texture = texture;
-								target.mesh.material.uniforms.tColor.value = texture;
-								mesh.material.needsUpdate = true;
-							}
-						}
-					);
-
-					const imagePath = `${imageParamsPath}/../${target.params.id}`;
-					new THREE.TextureLoader().load(imagePath,
-						(texture) => {
-							target.texture = texture;
-							target.mesh.material.uniforms.tColor.value = texture;
-							mesh.material.needsUpdate = true;
-						}
-					);
-					
-
-				}
-
-
+				moveToImage(hoveredElement);
 			}
 		};
 		viewer.renderer.domElement.addEventListener( 'mousemove', onMouseMove, false );
@@ -380,8 +450,8 @@ export class OrientedImageLoader{
 
 			for(const image of orientedImages){
 				const world = image.mesh.matrixWorld;
-				const {dimension} = image;
-				const aspect = dimension[0] / dimension[1];
+				const {width, height} = image;
+				const aspect = width / height;
 
 				const camera = viewer.scene.getActiveCamera();
 
@@ -411,6 +481,8 @@ export class OrientedImageLoader{
 		images.cameraParams = cameraParams;
 		images.imageParams = imageParams;
 		images.images = orientedImages;
+
+		debug.moveToImage = moveToImage;
 
 		return images;
 	}

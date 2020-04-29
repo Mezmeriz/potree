@@ -117,7 +117,7 @@ export class PointCloudOctree extends PointCloudTree {
 		this.updateMatrix();
 
 		{
-			let attributeName = "color";
+			let attributeName = "rgba";
 			if(this.pcoGeometry.pointAttributes.attributes.length > 1){
 				attributeName = this.pcoGeometry.pointAttributes.attributes[1].name;
 			}
@@ -175,6 +175,10 @@ export class PointCloudOctree extends PointCloudTree {
 		}else{
 			return null;
 		}
+	}
+
+	getAttributes(){
+		return this.pcoGeometry.pointAttributes;
 	}
 
 	toTreeNode (geometryNode, parent) {
@@ -784,12 +788,13 @@ export class PointCloudOctree extends PointCloudTree {
 
 		{ // update pick material
 			pickMaterial.pointSizeType = pointSizeType;
-			pickMaterial.shape = this.material.shape;
-			//pickMaterial.shape = Potree.PointShape.PARABOLOID;
+			//pickMaterial.shape = this.material.shape;
+			pickMaterial.shape = Potree.PointShape.PARABOLOID;
 
 			pickMaterial.uniforms.uFilterReturnNumberRange.value = this.material.uniforms.uFilterReturnNumberRange.value;
 			pickMaterial.uniforms.uFilterNumberOfReturnsRange.value = this.material.uniforms.uFilterNumberOfReturnsRange.value;
 			pickMaterial.uniforms.uFilterGPSTimeClipRange.value = this.material.uniforms.uFilterGPSTimeClipRange.value;
+			pickMaterial.uniforms.uFilterPointSourceIDClipRange.value = this.material.uniforms.uFilterPointSourceIDClipRange.value;
 
 			pickMaterial.activeAttributeName = "indices";
 

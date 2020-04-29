@@ -23,4 +23,3 @@ export class WorkerPool{
 		this.workers[url].push(worker);
 	}
 };
-

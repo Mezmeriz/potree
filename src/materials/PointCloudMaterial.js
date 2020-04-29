@@ -2,6 +2,7 @@
 import {Utils} from "../utils.js";
 import {resourcePath} from '../Potree.js';
 import {Gradients} from "./Gradients.js";
+import {Shaders} from "../../build/shaders/shaders.js";
 import {ClassificationScheme} from "./ClassificationScheme.js";
 import {PointSizeType, PointShape, TreeType, ElevationGradientRepeat} from "../defines.js";
 
@@ -48,6 +49,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 		this._treeType = treeType;
 		this._useEDL = false;
 		this.defines = new Map();
+		this.ranges = new Map();
 
 		this._activeAttributeName = null;
 
@@ -136,12 +138,15 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			clipMethod:			{ type: "i", value: 1 },
 			uShadowColor:		{ type: "3fv", value: [0, 0, 0] },
 
+			uExtraScale:		{ type: "f", value: 1},
+			uExtraOffset:		{ type: "f", value: 0},
 			uExtraRange:		{ type: "2fv", value: [0, 1] },
 			uExtraGammaBrightContr:	{ type: "3fv", value: [1, 0, 0] },
 
 			uFilterReturnNumberRange:		{ type: "fv", value: [0, 7]},
 			uFilterNumberOfReturnsRange:	{ type: "fv", value: [0, 7]},
 			uFilterGPSTimeClipRange:		{ type: "fv", value: [0, 7]},
+			uFilterPointSourceIDClipRange:		{ type: "fv", value: [0, 65535]},
 			matcapTextureUniform: 	{ type: "t", value: this.matcapTexture },
 			backfaceCulling: { type: "b", value: false },
 		};
@@ -673,6 +678,25 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 		}
 	}
 
+	get minSize(){
+		return this.uniforms.minSize.value;
+	}
+
+	set minSize(value){
+		if (this.uniforms.minSize.value !== value) {
+			this.uniforms.minSize.value = value;
+
+			this.dispatchEvent({
+				type: 'point_size_changed',
+				target: this
+			});
+			this.dispatchEvent({
+				type: 'material_property_changed',
+				target: this
+			});
+		}
+	}
+
 	get elevationRange () {
 		return this.uniforms.elevationRange.value;
 	}
@@ -681,15 +705,8 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 		let changed = this.uniforms.elevationRange.value[0] !== value[0]
 			|| this.uniforms.elevationRange.value[1] !== value[1];
 
-		if(changed){
+		if(changed) {
 			this.uniforms.elevationRange.value = value;
-
-			this._defaultElevationRangeChanged = true;
-
-			this.dispatchEvent({
-				type: 'material_property_changed',
-				target: this
-			});
 		}
 	}
 
@@ -824,7 +841,6 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			});
 		}
 	}
-
 	
 	get extraGamma () {
 		return this.uniforms.uExtraGammaBrightContr.value[0];
@@ -861,6 +877,32 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 	set extraContrast (value) {
 		if (this.uniforms.uExtraGammaBrightContr.value[2] !== value) {
 			this.uniforms.uExtraGammaBrightContr.value[2] = value;
+			this.dispatchEvent({
+				type: 'material_property_changed',
+				target: this
+			});
+		}
+	}
+
+	getRange(attributeName){
+		return this.ranges.get(attributeName);
+	}
+
+	setRange(attributeName, newRange){
+
+		let rangeChanged = false;
+
+		let oldRange = this.ranges.get(attributeName);
+
+		if(oldRange != null && newRange != null){
+			rangeChanged = oldRange[0] !== newRange[0] || oldRange[1] !== newRange[1];
+		}else{
+			rangeChanged = true;
+		}
+
+		this.ranges.set(attributeName, newRange);
+
+		if(rangeChanged){
 			this.dispatchEvent({
 				type: 'material_property_changed',
 				target: this
@@ -1023,17 +1065,6 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 		return texture; 
 	}
 
-	static generateMatcapTexture (matcap) {
-	var url = new URL(resourcePath + "/textures/matcap/" + matcap).href;
-	let texture = new THREE.TextureLoader().load( url );
-		texture.magFilter = texture.minFilter = THREE.LinearFilter; 
-		texture.needsUpdate = true;
-		// PotreeConverter_1.6_2018_07_29_windows_x64\PotreeConverter.exe autzen_xyzrgbXYZ_ascii.xyz -f xyzrgbXYZ -a RGB NORMAL -o autzen_xyzrgbXYZ_ascii_a -p index --overwrite
-		// Switch matcap texture on the fly : viewer.scene.pointclouds[0].material.matcap = 'matcap1.jpg'; 
-		// For non power of 2, use LinearFilter and dont generate mipmaps, For power of 2, use NearestFilter and generate mipmaps : matcap2.jpg 1 2 8 11 12 13
-		return texture; 
-	}
-
 	disableEvents(){
 		if(this._hiddenListeners === undefined){
 			this._hiddenListeners = this._listeners;
@@ -1046,12 +1077,17 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 		this._hiddenListeners = undefined;
 	};
 
-	copyFrom(from){
+	// copyFrom(from){
 
-		for(let name of this.uniforms){
-			this.uniforms[name].value = from.uniforms[name].value;
-		}
+	// 	var a = 10;
 
-	}
+	// 	for(let name of Object.keys(this.uniforms)){
+	// 		this.uniforms[name].value = from.uniforms[name].value;
+	// 	}
+	// }
+
+	// copy(from){
+	// 	this.copyFrom(from);
+	// }
 
 }

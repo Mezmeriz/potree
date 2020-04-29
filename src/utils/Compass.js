@@ -1,6 +1,5 @@
 
 import {resourcePath} from "../Potree.js";
-import {Utils} from '../utils.js';
 import {Calc} from './Calc.js';
 
 export class Compass{

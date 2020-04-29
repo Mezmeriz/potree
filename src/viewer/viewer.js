@@ -9,10 +9,12 @@ import {ClippingTool} from "../utils/ClippingTool.js";
 import {TransformationTool} from "../utils/TransformationTool.js";
 import {Utils} from "../utils.js";
 import {Calc} from '../utils/Calc.js';
+import {MapView} from "./map.js";
 import {ProfileWindow, ProfileWindowController} from "./profile.js";
 import {BoxVolume} from "../utils/Volume.js";
 import {Features} from "../Features.js";
 import {Message} from "../utils/Message.js";
+import {Sidebar} from "./sidebar.js";
 
 import {AnnotationTool} from "../utils/AnnotationTool.js";
 import {MeasuringTool} from "../utils/MeasuringTool.js";
@@ -90,6 +92,7 @@ export class Viewer extends EventDispatcher{
 		this.filterReturnNumberRange = [0, 7];
 		this.filterNumberOfReturnsRange = [0, 7];
 		this.filterGPSTimeRange = [-Infinity, Infinity];
+		this.filterPointSourceIDRange = [0, 65535];
 
 		this.potreeRenderer = null;
 		this.edlRenderer = null;
@@ -114,6 +117,14 @@ export class Viewer extends EventDispatcher{
 		this.pointBudget = 1000000;
 
 		this.initThree();
+		this.prepareVR();
+		this.initDragAndDrop();
+
+		if(typeof Stats !== "undefined"){
+			this.stats = new Stats();
+			this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+			document.body.appendChild( this.stats.dom );
+		}
 
 		{
 			let canvas = this.renderer.domElement;
@@ -628,6 +639,11 @@ export class Viewer extends EventDispatcher{
 		this.dispatchEvent({'type': 'filter_gps_time_range_changed', 'viewer': this});
 	}
 
+	setFilterPointSourceIDRange(from, to){
+		this.filterPointSourceIDRange = [from, to]
+		this.dispatchEvent({'type': 'filter_point_source_id_range_changed', 'viewer': this});
+	}
+
 	setLengthUnit (value) {
 		switch (value) {
 			case 'm':
@@ -881,6 +897,117 @@ export class Viewer extends EventDispatcher{
 		}
 	}
 
+	async loadProject(url){
+
+		const response = await fetch(url);
+	
+		const json = await response.json();
+		// const json = JSON.parse(text);
+
+		if(json.type === "Potree"){
+			Potree.loadProject(viewer, json);
+		}
+
+		//Potree.loadProject(this, url);
+	}
+
+	saveProject(){
+		return Potree.saveProject(this);
+	}
+	
+	loadSettingsFromURL(){
+		if(Utils.getParameterByName("pointSize")){
+			this.setPointSize(parseFloat(Utils.getParameterByName("pointSize")));
+		}
+		
+		if(Utils.getParameterByName("FOV")){
+			this.setFOV(parseFloat(Utils.getParameterByName("FOV")));
+		}
+		
+		if(Utils.getParameterByName("opacity")){
+			this.setOpacity(parseFloat(Utils.getParameterByName("opacity")));
+		}
+		
+		if(Utils.getParameterByName("edlEnabled")){
+			let enabled = Utils.getParameterByName("edlEnabled") === "true";
+			this.setEDLEnabled(enabled);
+		}
+
+		if (Utils.getParameterByName('edlRadius')) {
+			this.setEDLRadius(parseFloat(Utils.getParameterByName('edlRadius')));
+		}
+
+		if (Utils.getParameterByName('edlStrength')) {
+			this.setEDLStrength(parseFloat(Utils.getParameterByName('edlStrength')));
+		}
+
+		if (Utils.getParameterByName('pointBudget')) {
+			this.setPointBudget(parseFloat(Utils.getParameterByName('pointBudget')));
+		}
+
+		if (Utils.getParameterByName('showBoundingBox')) {
+			let enabled = Utils.getParameterByName('showBoundingBox') === 'true';
+			if (enabled) {
+				this.setShowBoundingBox(true);
+			} else {
+				this.setShowBoundingBox(false);
+			}
+		}
+
+		if (Utils.getParameterByName('material')) {
+			let material = Utils.getParameterByName('material');
+			this.setMaterial(material);
+		}
+
+		if (Utils.getParameterByName('pointSizing')) {
+			let sizing = Utils.getParameterByName('pointSizing');
+			this.setPointSizing(sizing);
+		}
+
+		if (Utils.getParameterByName('quality')) {
+			let quality = Utils.getParameterByName('quality');
+			this.setQuality(quality);
+		}
+
+		if (Utils.getParameterByName('position')) {
+			let value = Utils.getParameterByName('position');
+			value = value.replace('[', '').replace(']', '');
+			let tokens = value.split(';');
+			let x = parseFloat(tokens[0]);
+			let y = parseFloat(tokens[1]);
+			let z = parseFloat(tokens[2]);
+
+			this.scene.view.position.set(x, y, z);
+		}
+
+		if (Utils.getParameterByName('target')) {
+			let value = Utils.getParameterByName('target');
+			value = value.replace('[', '').replace(']', '');
+			let tokens = value.split(';');
+			let x = parseFloat(tokens[0]);
+			let y = parseFloat(tokens[1]);
+			let z = parseFloat(tokens[2]);
+
+			this.scene.view.lookAt(new THREE.Vector3(x, y, z));
+		}
+
+		if (Utils.getParameterByName('background')) {
+			let value = Utils.getParameterByName('background');
+			this.setBackground(value);
+		}
+
+		// if(Utils.getParameterByName("elevationRange")){
+		//	let value = Utils.getParameterByName("elevationRange");
+		//	value = value.replace("[", "").replace("]", "");
+		//	let tokens = value.split(";");
+		//	let x = parseFloat(tokens[0]);
+		//	let y = parseFloat(tokens[1]);
+		//
+		//	this.setElevationRange(x, y);
+		//	//this.scene.view.target.set(x, y, z);
+		// }
+	};
+
 	// ------------------------------------------------------------------------------------
 	// Viewer Internals
 	// ------------------------------------------------------------------------------------
@@ -891,13 +1018,6 @@ export class Viewer extends EventDispatcher{
 			this.fpControls.enabled = false;
 			this.fpControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.fpControls.addEventListener('end', this.enableAnnotations.bind(this));
-			// this.fpControls.addEventListener("double_click_move", (event) => {
-			//	let distance = event.targetLocation.distanceTo(event.position);
-			//	this.setMoveSpeed(Math.pow(distance, 0.4));
-			// });
-			// this.fpControls.addEventListener("move_speed_changed", (event) => {
-			//	this.setMoveSpeed(this.fpControls.moveSpeed);
-			// });
 		}
 
 		// { // create GEO CONTROLS
@@ -938,33 +1058,97 @@ export class Viewer extends EventDispatcher{
 		}else{
 			this.guiLoadTasks.push(callback);
 		}
+	};
+
+	promiseGuiLoaded(){
+		return new Promise( resolve => {
+
+			if(this.guiLoaded){
+				resolve();
+			}else{
+				this.guiLoadTasks.push(resolve);
+			}
+		
+		});
 	}
 
 	loadGUI(callback){
 
-		this.onGUILoaded(callback);
-		let elProfile = $('<div>').load(new URL(resourcePath + '/profile.html').href, () => {
-			$(document.body).append(elProfile.children());
-			this.profileWindow = new ProfileWindow(this);
-			this.profileWindowController = new ProfileWindowController(this);
+		if(callback){
+			this.onGUILoaded(callback);
+		}
 
-			$('#profile_window').draggable({
-				handle: $('#profile_titlebar'),
-				containment: $(document.body)
-			});
-			$('#profile_window').resizable({
-				containment: $(document.body),
-				handles: 'n, e, s, w'
+		let viewer = this;
+		let sidebarContainer = $('#potree_sidebar_container');
+		sidebarContainer.load(new URL(Potree.scriptPath + '/sidebar.html').href, () => {
+			sidebarContainer.css('width', '300px');
+			sidebarContainer.css('height', '100%');
+
+			let imgMenuToggle = document.createElement('img');
+			imgMenuToggle.src = new URL(Potree.resourcePath + '/icons/menu_button.svg').href;
+			imgMenuToggle.onclick = this.toggleSidebar;
+			imgMenuToggle.classList.add('potree_menu_toggle');
+
+			let imgMapToggle = document.createElement('img');
+			imgMapToggle.src = new URL(Potree.resourcePath + '/icons/map_icon.png').href;
+			imgMapToggle.style.display = 'none';
+			imgMapToggle.onclick = e => { this.toggleMap(); };
+			imgMapToggle.id = 'potree_map_toggle';
+
+			viewer.renderArea.insertBefore(imgMapToggle, viewer.renderArea.children[0]);
+			viewer.renderArea.insertBefore(imgMenuToggle, viewer.renderArea.children[0]);
+
+			this.mapView = new MapView(this);
+			this.mapView.init();
+
+			i18n.init({
+				lng: 'en',
+				resGetPath: Potree.resourcePath + '/lang/__lng__/__ns__.json',
+				preload: ['en', 'fr', 'de', 'jp', 'se', 'es'],
+				getAsync: true,
+				debug: false
+			}, function (t) {
+				// Start translation once everything is loaded
+				$('body').i18n();
 			});
 
 			$(() => {
-				this.guiLoaded = true;
-				for(let task of this.guiLoadTasks){
-					task();
-				}
+				//initSidebar(this);
+				let sidebar = new Sidebar(this);
+				sidebar.init();
 
+				this.sidebar = sidebar;
+
+				//if (callback) {
+				//	$(callback);
+				//}
+
+				let elProfile = $('<div>').load(new URL(resourcePath + '/profile.html').href, () => {
+					$(document.body).append(elProfile.children());
+					this.profileWindow = new ProfileWindow(this);
+					this.profileWindowController = new ProfileWindowController(this);
+
+					$('#profile_window').draggable({
+						handle: $('#profile_titlebar'),
+						containment: $(document.body)
+					});
+					$('#profile_window').resizable({
+						containment: $(document.body),
+						handles: 'n, e, s, w'
+					});
+
+					$(() => {
+						this.guiLoaded = true;
+						for(let task of this.guiLoadTasks){
+							task();
+						}
+
+					});
+				});
 			});
 		});
+
+		return this.promiseGuiLoaded();
 	}
 
 	setLanguage (lang) {
@@ -974,6 +1158,75 @@ export class Viewer extends EventDispatcher{
 
 	setServer (server) {
 		this.server = server;
+	}
+
+	initDragAndDrop(){
+		function allowDrag(e) {
+			e.dataTransfer.dropEffect = 'copy';
+			e.preventDefault();
+		}
+
+		let dropHandler = async (event) => {
+			console.log(event);
+			event.preventDefault();
+
+			for(const item of event.dataTransfer.items){
+				console.log(item);
+
+				if(item.kind !== "file"){
+					continue;
+				}
+
+				const file = item.getAsFile();
+
+				const isJson = file.name.toLowerCase().endsWith(".json");
+				const isGeoPackage = file.name.toLowerCase().endsWith(".gpkg");
+
+				if(isJson){
+					try{
+
+						const text = await file.text();
+						const json = JSON.parse(text);
+
+						if(json.type === "Potree"){
+							Potree.loadProject(viewer, json);
+						}
+					}catch(e){
+						console.error("failed to parse the dropped file as JSON");
+						console.error(e);
+					}
+				}else if(isGeoPackage){
+					const hasPointcloud = viewer.scene.pointclouds.length > 0;
+
+					if(!hasPointcloud){
+						let msg = "At least one point cloud is needed that specifies the ";
+						msg += "coordinate reference system before loading vector data.";
+						console.error(msg);
+					}else{
+
+						proj4.defs("WGS84", "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+						proj4.defs("pointcloud", this.getProjection());
+						let transform = proj4("WGS84", "pointcloud");
+
+						const buffer = await file.arrayBuffer();
+
+						const params = {
+							transform: transform,
+							source: file.name,
+						};
+						
+						const geo = await Potree.GeoPackageLoader.loadBuffer(buffer, params);
+						viewer.scene.addGeopackage(geo);
+					}
+				}
+				
+			}
+		};
+
+
+		$("body")[0].addEventListener("dragenter", allowDrag);
+		$("body")[0].addEventListener("dragover", allowDrag);
+		$("body")[0].addEventListener("drop", dropHandler);
 	}
 
 	initThree () {
@@ -1218,12 +1471,20 @@ export class Viewer extends EventDispatcher{
 
 		const material = pointcloud.material;
 
-		const attIntensity = pointcloud.getAttribute("intensity");
-		if(attIntensity && material.intensityRange[0] === Infinity){
-			material.intensityRange = [...attIntensity.range];
-		}
+		// const attIntensity = pointcloud.getAttribute("intensity");
+		// if(attIntensity && material.intensityRange[0] === Infinity){
+		// 	material.intensityRange = [...attIntensity.range];
+		// }
 
+		// let attributes = pointcloud.getAttributes();
 
+		// for(let attribute of attributes.attributes){
+		// 	if(attribute.range){
+		// 		let range = [...attribute.range];
+		// 		material.computedRange.set(attribute.name, range);
+		// 		//material.setRange(attribute.name, range);
+		// 	}
+		// }
 	}
 
 	update(delta, timestamp){
@@ -1253,6 +1514,7 @@ export class Viewer extends EventDispatcher{
 			material.uniforms.uFilterReturnNumberRange.value = this.filterReturnNumberRange;
 			material.uniforms.uFilterNumberOfReturnsRange.value = this.filterNumberOfReturnsRange;
 			material.uniforms.uFilterGPSTimeClipRange.value = this.filterGPSTimeRange;
+			material.uniforms.uFilterPointSourceIDClipRange.value = this.filterPointSourceIDRange;
 
 			material.classification = this.classifications;
 			material.recomputeClassification();
@@ -1481,7 +1743,7 @@ export class Viewer extends EventDispatcher{
 			type: 'update',
 			delta: delta,
 			timestamp: timestamp});
-			
+
 		if(debug.measureTimings) {
 			performance.mark("update-end");
 			performance.measure("update", "update-start", "update-end");
@@ -1500,6 +1762,7 @@ export class Viewer extends EventDispatcher{
 					this.hqRenderer = new HQSplatRenderer(this);
 				}
 				this.hqRenderer.useEDL = this.useEDL;
+				//this.hqRenderer.render(this.renderer);
 
 				pRenderer = this.hqRenderer;
 			}else{
@@ -1507,13 +1770,13 @@ export class Viewer extends EventDispatcher{
 					if (!this.edlRenderer) {
 						this.edlRenderer = new EDLRenderer(this);
 					}
-
+					//this.edlRenderer.render(this.renderer);
 					pRenderer = this.edlRenderer;
 				} else {
 					if (!this.potreeRenderer) {
 						this.potreeRenderer = new PotreeRenderer(this);
 					}
-
+					//this.potreeRenderer.render();
 					pRenderer = this.potreeRenderer;
 				}
 			}
@@ -1677,7 +1940,7 @@ export class Viewer extends EventDispatcher{
 		}catch(e){
 			this.onCrash(e);
 		}
-		
+
 		if(debug.measureTimings){
 			performance.mark("render-end");
 			performance.measure("render", "render-start", "render-end");
@@ -1846,6 +2109,7 @@ export class Viewer extends EventDispatcher{
 		}
 		
 		this.resolveTimings(timestamp);
+		// Potree.framenumber++;
 
 		if(this.stats){
 			this.stats.end();

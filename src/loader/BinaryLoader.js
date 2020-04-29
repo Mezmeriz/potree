@@ -82,8 +82,8 @@ export class BinaryLoader{
 
 				if (property === "POSITION_CARTESIAN") {
 					geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
-				} else if (property === "RGBA") {
-					geometry.addAttribute('color', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+				} else if (property === "rgba") {
+					geometry.addAttribute("rgba", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
 				} else if (property === "NORMAL_SPHEREMAPPED") {
 					geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
 				} else if (property === "NORMAL_OCT16") {
@@ -102,6 +102,7 @@ export class BinaryLoader{
 					bufferAttribute.potree = {
 						offset: buffers[property].offset,
 						scale: buffers[property].scale,
+						preciseBuffer: buffers[property].preciseBuffer,
 						range: batchAttribute.range,
 					};
 
@@ -110,6 +111,10 @@ export class BinaryLoader{
 					const attribute = pointAttributes.attributes.find(a => a.name === batchAttribute.name);
 					attribute.range[0] = Math.min(attribute.range[0], batchAttribute.range[0]);
 					attribute.range[1] = Math.max(attribute.range[1], batchAttribute.range[1]);
+
+					if(node.getLevel() === 0){
+						attribute.initialRange = batchAttribute.range;
+					}
 				}
 			}
 

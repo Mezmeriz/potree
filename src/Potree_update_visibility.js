@@ -219,6 +219,22 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 				let pzPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(pzN, pz);
 				let nzPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(nzN, nz);
 
+				//if(window.debugdraw !== undefined && window.debugdraw === true && node.name === "r60"){
+
+				//	Potree.utils.debugPlane(viewer.scene.scene, pxPlane, 1, 0xFF0000);
+				//	Potree.utils.debugPlane(viewer.scene.scene, nxPlane, 1, 0x990000);
+				//	Potree.utils.debugPlane(viewer.scene.scene, pyPlane, 1, 0x00FF00);
+				//	Potree.utils.debugPlane(viewer.scene.scene, nyPlane, 1, 0x009900);
+				//	Potree.utils.debugPlane(viewer.scene.scene, pzPlane, 1, 0x0000FF);
+				//	Potree.utils.debugPlane(viewer.scene.scene, nzPlane, 1, 0x000099);
+
+				//	Potree.utils.debugBox(viewer.scene.scene, box, new THREE.Matrix4(), 0x00FF00);
+				//	Potree.utils.debugBox(viewer.scene.scene, box, pointcloud.matrixWorld, 0xFF0000);
+				//	Potree.utils.debugBox(viewer.scene.scene, clipBox.box.boundingBox, clipBox.box.matrixWorld, 0xFF0000);
+
+				//	window.debugdraw = false;
+				//}
+
 				let frustum = new THREE.Frustum(pxPlane, nxPlane, pyPlane, nyPlane, pzPlane, nzPlane);
 				let intersects = frustum.intersectsBox(box);
 
@@ -372,6 +388,15 @@ export function updateVisibility(pointclouds, camera, renderer, pointBudget){
 	}// end priority queue loop
 
 	for (let i = 0; i < Math.min(nodes.maxNodesLoading, unloadedGeometry.length); i++) {
+	{ // update DEM
+		let maxDEMLevel = 4;
+		let candidates = pointclouds
+			.filter(p => (p.generateDEM && p.dem instanceof Potree.DEM));
+		for (let pointcloud of candidates) {
+			let updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= maxDEMLevel);
+			pointcloud.dem.update(updatingNodes);
+		}
+	}
 		unloadedGeometry[i].load();
 	}
 

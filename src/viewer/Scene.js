@@ -34,6 +34,7 @@ export class Scene extends EventDispatcher{
 		this.polygonClipVolumes = [];
 		this.cameraAnimations = [];
 		this.orientedImages = [];
+		this.images360 = [];
 		this.geopackages = [];
 		
 		this.fpControls = null;
@@ -248,6 +249,30 @@ export class Scene extends EventDispatcher{
 			});
 		}
 	};
+
+	add360Images(images){
+		this.images360.push(images);
+		this.scene.add(images.node);
+
+		this.dispatchEvent({
+			'type': '360_images_added',
+			'scene': this,
+			'images': images
+		});
+	}
+
+	remove360Images(images){
+		let index = this.images360.indexOf(images);
+		if (index > -1) {
+			this.images360.splice(index, 1);
+
+			this.dispatchEvent({
+				'type': '360_images_removed',
+				'scene': this,
+				'images': images
+			});
+		}
+	}
 
 	addGeopackage(geopackage){
 		this.geopackages.push(geopackage);

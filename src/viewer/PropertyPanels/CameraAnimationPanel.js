@@ -1,5 +1,4 @@
 
-import {Utils} from "../../utils.js";
 import {resourcePath} from '../../Potree.js';
 
 export class CameraAnimationPanel{

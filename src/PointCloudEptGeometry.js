@@ -6,7 +6,6 @@ import {EptZstandardLoader} from './loader/ept/ZstandardLoader.js';
 import {EptBinaryLoader} from './loader/ept/BinaryLoader.js';
 import {nodes} from './Nodes.js';
 
-
 class U {
 	static toVector3(v, offset) {
 		return new THREE.Vector3().fromArray(v, offset || 0);
@@ -74,7 +73,7 @@ export class PointCloudEptGeometry {
 			const attributes = new PointAttributes();
 
 			attributes.add(PointAttribute.POSITION_CARTESIAN);
-			attributes.add(new PointAttribute("RGBA", PointAttributeTypes.DATA_TYPE_UINT8, 4));
+			attributes.add(new PointAttribute("rgba", PointAttributeTypes.DATA_TYPE_UINT8, 4));
 			attributes.add(new PointAttribute("intensity", PointAttributeTypes.DATA_TYPE_UINT16, 1));
 			attributes.add(new PointAttribute("classification", PointAttributeTypes.DATA_TYPE_UINT8, 1));
 			attributes.add(new PointAttribute("gps-time", PointAttributeTypes.DATA_TYPE_DOUBLE, 1));

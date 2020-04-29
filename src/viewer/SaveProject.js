@@ -1,6 +1,28 @@
-
+import {PointSizeType} from "../defines.js"
 
 function createPointcloudData(pointcloud) {
+
+	let material = pointcloud.material;
+
+	let ranges = [];
+	
+	for(let [name, value] of material.ranges){
+		ranges.push({
+			name: name,
+			value: value,
+		});
+	}
+
+	let pointSizeTypeName = Object.entries(PointSizeType).find(e => e[1] === material.pointSizeType)[0];
+
+	let jsonMaterial = {
+		activeAttributeName: material.activeAttributeName,
+		ranges: ranges,
+		size: material.size,
+		minSize: material.minSize,
+		pointSizeType: pointSizeTypeName,
+		matcap: material.matcap,
+	};
 
 	const pcdata = {
 		name: pointcloud.name,
@@ -8,7 +30,7 @@ function createPointcloudData(pointcloud) {
 		position: pointcloud.position.toArray(),
 		rotation: pointcloud.rotation.toArray(),
 		scale: pointcloud.scale.toArray(),
-		activeAttributeName: pointcloud.material.activeAttributeName,
+		material: jsonMaterial,
 	};
 
 	return pcdata;
@@ -119,11 +141,11 @@ function createAnnotationData(annotation){
 	}
 
 	if(annotation.cameraTarget){
-		annotation.cameraTarget = annotation.cameraTarget.toArray();
+		data.cameraTarget = annotation.cameraTarget.toArray();
 	}
 
 	if(typeof annotation.radius !== "undefined"){
-		annotation.radius = annotation.radius;
+		data.radius = annotation.radius;
 	}
 
 	return data;

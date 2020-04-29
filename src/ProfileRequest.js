@@ -134,7 +134,6 @@ export class ProfileRequest {
 
 				var geom = node.pcoGeometry;
 				var hierarchyStepSize = geom ? geom.hierarchyStepSize : 1;
-
 				var doTraverse = node.getLevel() === 0 ||
 					(node.level % hierarchyStepSize === 0 && node.hasChildren);
 
@@ -214,6 +213,7 @@ export class ProfileRequest {
 				mileage[numAccepted] = localMileage + totalMileage;
 				points.boundingBox.expandByPoint(pos);
 
+				pos.sub(this.pointcloud.position);
 				acceptedPositions[3 * numAccepted + 0] = pos.x;
 				acceptedPositions[3 * numAccepted + 1] = pos.y;
 				acceptedPositions[3 * numAccepted + 2] = pos.z;

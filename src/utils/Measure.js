@@ -3,19 +3,16 @@ import {TextSprite} from "../TextSprite.js";
 import {Mouse} from './Mouse.js';
 import {Display} from './Display.js';
 import {Calc} from './Calc.js';
-import {LineGeometry} from '../../libs/three.js/extra/lines/LineGeometry.js';
-import {LineMaterial} from '../../libs/three.js/extra/lines/LineMaterial.js';
-import {Line2} from '../../libs/three.js/extra/lines/Line2.js';
 
 function createHeightLine(){
-	let lineGeometry = new LineGeometry();
+	let lineGeometry = new THREE.LineGeometry();
 
 	lineGeometry.setPositions([
 		0, 0, 0,
 		0, 0, 0,
 	]);
 
-	let lineMaterial = new LineMaterial({
+	let lineMaterial = new THREE.LineMaterial({
 		color: 0x00ff00, 
 		dashSize: 5, 
 		gapSize: 2,
@@ -24,7 +21,7 @@ function createHeightLine(){
 	});
 
 	lineMaterial.depthTest = false;
-	const heightEdge = new Line2(lineGeometry, lineMaterial);
+	const heightEdge = new THREE.Line2(lineGeometry, lineMaterial);
 	heightEdge.visible = false;
 
 	//this.add(this.heightEdge);
@@ -75,14 +72,14 @@ function createCircleRadiusLabel(){
 }
 
 function createCircleRadiusLine(){
-	const lineGeometry = new LineGeometry();
+	const lineGeometry = new THREE.LineGeometry();
 
 	lineGeometry.setPositions([
 		0, 0, 0,
 		0, 0, 0,
 	]);
 
-	const lineMaterial = new LineMaterial({
+	const lineMaterial = new THREE.LineMaterial({
 		color: 0xff0000, 
 		linewidth: 2, 
 		resolution:  new THREE.Vector2(1000, 1000),
@@ -92,7 +89,7 @@ function createCircleRadiusLine(){
 
 	lineMaterial.depthTest = false;
 
-	const circleRadiusLine = new Line2(lineGeometry, lineMaterial);
+	const circleRadiusLine = new THREE.Line2(lineGeometry, lineMaterial);
 	circleRadiusLine.visible = false;
 
 	return circleRadiusLine;
@@ -124,10 +121,10 @@ function createCircleLine(){
 		);
 	}
 
-	const geometry = new LineGeometry();
+	const geometry = new THREE.LineGeometry();
 	geometry.setPositions(coordinates);
 
-	const material = new LineMaterial({
+	const material = new THREE.LineMaterial({
 		color: 0xff0000, 
 		dashSize: 5, 
 		gapSize: 2,
@@ -137,7 +134,7 @@ function createCircleLine(){
 
 	material.depthTest = false;
 
-	const circleLine = new Line2(geometry, material);
+	const circleLine = new THREE.Line2(geometry, material);
 	circleLine.visible = false;
 	circleLine.computeLineDistances();
 
@@ -155,15 +152,14 @@ function createCircleCenter(){
 }
 
 function createLine(){
-	const geometry = new LineGeometry();
-
+	const geometry = new THREE.LineGeometry();
 	geometry.setPositions([
 		0, 0, 0,
 		0, 0, 0,
 	]);
 
-	const material = new LineMaterial({
-		color: 0xff0000, 
+	const material = new THREE.LineMaterial({ 
+		color: 0xff0000,
 		linewidth: 2, 
 		resolution:  new THREE.Vector2(1000, 1000),
 		gapSize: 1,
@@ -172,7 +168,7 @@ function createLine(){
 
 	material.depthTest = false;
 
-	const line = new Line2(geometry, material);
+	const line = new THREE.Line2(geometry, material);
 
 	return line;
 }
@@ -204,11 +200,11 @@ function createCircle(){
 		);
 	}
 
-	const geometry = new LineGeometry();
+	const geometry = new THREE.LineGeometry();
 	geometry.setPositions(coordinates);
 
-	const material = new LineMaterial({
-		color: 0xff0000, 
+	const material = new THREE.LineMaterial({ 
+		color: 0xff0000,
 		dashSize: 5, 
 		gapSize: 2,
 		linewidth: 2, 
@@ -217,7 +213,7 @@ function createCircle(){
 
 	material.depthTest = false;
 
-	const line = new Line2(geometry, material);
+	const line = new THREE.Line2(geometry, material);
 	line.computeLineDistances();
 
 	return line;
@@ -267,15 +263,15 @@ function createAzimuth(){
 
 	azimuth.node = new THREE.Object3D();
 	azimuth.node.add(
-		azimuth.label,
-		azimuth.center,
-		azimuth.target,
-		azimuth.north,
 		azimuth.centerToNorth,
 		azimuth.centerToTarget,
 		azimuth.centerToTargetground,
 		azimuth.targetgroundToTarget,
 		azimuth.circle,
+		azimuth.label,
+		azimuth.center,
+		azimuth.target,
+		azimuth.north,
 	);
 
 	return azimuth;
@@ -358,13 +354,13 @@ export class Measure extends THREE.Object3D {
 		this.spheres.push(sphere);
 
 		{ // edges
-			let lineGeometry = new LineGeometry();
+			let lineGeometry = new THREE.LineGeometry();
 			lineGeometry.setPositions( [
 					0, 0, 0,
 					0, 0, 0,
 			]);
 
-			let lineMaterial = new LineMaterial({
+			let lineMaterial = new THREE.LineMaterial({
 				color: 0xff0000, 
 				linewidth: 2, 
 				resolution:  new THREE.Vector2(1000, 1000),
@@ -372,7 +368,7 @@ export class Measure extends THREE.Object3D {
 
 			lineMaterial.depthTest = false;
 
-			let edge = new Line2(lineGeometry, lineMaterial);
+			let edge = new THREE.Line2(lineGeometry, lineMaterial);
 			edge.visible = true;
 
 			this.add(edge);
@@ -603,7 +599,7 @@ export class Measure extends THREE.Object3D {
 
 			{ // coordinate labels
 				let coordinateLabel = this.coordinateLabels[0];
-				
+
 				let msg = position.toArray().map(p => Display.addCommas(p.toFixed(2))).join(" / ");
 				coordinateLabel.setText(msg);
 

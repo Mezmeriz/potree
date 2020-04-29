@@ -3,6 +3,7 @@
 import {MouseButtons} from "../defines.js";
 import {Mouse} from '../utils/Mouse.js';
 import {Calc} from '../utils/Calc.js'
+import {Utils} from "../utils.js";
 import {EventDispatcher} from "../EventDispatcher.js";
 
 export class EarthControls extends EventDispatcher {
@@ -168,7 +169,7 @@ export class EarthControls extends EventDispatcher {
 	
 	zoomToLocation(mouse){
 		let camera = this.scene.getActiveCamera();
-		
+
 		let I = Mouse.getMousePointCloudIntersection(
 			mouse,
 			camera,

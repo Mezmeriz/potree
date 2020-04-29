@@ -1,6 +1,3 @@
-import "./extensions/OrthographicCamera.js";
-import "./extensions/PerspectiveCamera.js";
-import "./extensions/Ray.js";
 
 import {LRU} from "./LRU";
 import {WorkerPool} from "./WorkerPool";
@@ -25,7 +22,12 @@ if (document.currentScript.src) {
 	if (scriptPath.slice(-1) === '/') {
 		scriptPath = scriptPath.slice(0, -1);
 	}
-} else {
+} else if(import.meta){
+	scriptPath = new URL(import.meta.url + "/..").href;
+	if (scriptPath.slice(-1) === '/') {
+		scriptPath = scriptPath.slice(0, -1);
+	}
+}else {
 	console.error('Potree was unable to find its script path using document.currentScript. Is Potree included with a script tag? Does your browser support this function?');
 }
 
