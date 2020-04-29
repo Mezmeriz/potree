@@ -86,8 +86,7 @@ gulp.task("add-import-header", function () {
     const importHeader = 'import * as THREE from \'./libs/three.min.js\';\n' +
         'import * as d3 from \'./libs/d3.min.js\';\n' +
         'import * as TWEEN from \'./libs/tween.min.js\';\n' +
-        'import proj4 from \'./libs/proj4.js\';\n' +
-        'import {Shaders} from \'./shaders/shaders.js\';\n';
+        'import proj4 from \'./libs/proj4.js\';\n'
 
     return gulp.src('build/potree.js')
         .pipe(header(importHeader))
