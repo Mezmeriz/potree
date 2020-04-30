@@ -56,6 +56,9 @@ export class InputHandler extends EventDispatcher {
 		this.domElement.addEventListener('touchstart', this.onTouchStart.bind(this));
 		this.domElement.addEventListener('touchend', this.onTouchEnd.bind(this));
 		this.domElement.addEventListener('touchmove', this.onTouchMove.bind(this));
+		this.domElement.addEventListener('blur', () => {
+			this.pressedKeys = {};
+		})
 	}
 
 	addInputListener (listener) {
