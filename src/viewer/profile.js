@@ -271,7 +271,7 @@ export class ProfileWindow extends EventDispatcher {
 
 		this.pRenderer = new Renderer(this.renderer);
 
-		this.elRoot.i18n();
+		// this.elRoot.i18n();
 	}
 
 	initListeners () {
