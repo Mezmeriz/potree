@@ -554,6 +554,18 @@ export class Renderer {
 		this.toggle = 0;
 	}
 
+	deleteBuffer(geometry) {
+
+		let gl = this.gl;
+		let webglBuffer = this.buffers.get(geometry);
+		if (webglBuffer != null) {
+			for (let attributeName in geometry.attributes) {
+				gl.deleteBuffer(webglBuffer.vbos.get(attributeName).handle);
+			}
+			this.buffers.delete(geometry);
+		}
+	}
+
 	createBuffer(geometry){
 		let gl = this.gl;
 		let webglBuffer = new WebGLBuffer();
@@ -594,6 +606,12 @@ export class Renderer {
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 		gl.bindVertexArray(null);
+
+		let disposeHandler = (event) => {
+			this.deleteBuffer(geometry);
+			geometry.removeEventListener("dispose", disposeHandler);
+		};
+		geometry.addEventListener("dispose", disposeHandler);
 
 		return webglBuffer;
 	}

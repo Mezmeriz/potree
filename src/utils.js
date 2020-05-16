@@ -6,7 +6,6 @@ import {Measure} from "./utils/Measure.js";
 import {PolygonClipVolume} from "./utils/PolygonClipVolume.js";
 import {resourcePath} from './Potree.js'
 
-
 export class Utils {
 	static async loadShapefileFeatures (file, callback) {
 		let features = [];
@@ -450,9 +449,8 @@ export class Utils {
 		};
 
 		let vector = new THREE.Vector3(normalizedMouse.x, normalizedMouse.y, 0.5);
-		let origin = new THREE.Vector3(normalizedMouse.x, normalizedMouse.y, 0);
+		let origin = camera.position.clone();
 		vector.unproject(camera);
-		origin.unproject(camera);
 		let direction = new THREE.Vector3().subVectors(vector, origin).normalize();
 
 		let ray = new THREE.Ray(origin, direction);
@@ -721,6 +719,134 @@ export class Utils {
 		} else if (measurement instanceof PolygonClipVolume) {
 			return `${resourcePath}/icons/clip-polygon.svg`;
 		}
+	}
+
+	static lineToLineIntersection(P0, P1, P2, P3){
+
+		const P = [P0, P1, P2, P3];
+
+		const d = (m, n, o, p) => {
+			let result =  
+				  (P[m].x - P[n].x) * (P[o].x - P[p].x)
+				+ (P[m].y - P[n].y) * (P[o].y - P[p].y)
+				+ (P[m].z - P[n].z) * (P[o].z - P[p].z);
+
+			return result;
+		};
+
+
+		const mua = (d(0, 2, 3, 2) * d(3, 2, 1, 0) - d(0, 2, 1, 0) * d(3, 2, 3, 2))
+		        /**-----------------------------------------------------------------**/ /
+		            (d(1, 0, 1, 0) * d(3, 2, 3, 2) - d(3, 2, 1, 0) * d(3, 2, 1, 0));
+
+
+		const mub = (d(0, 2, 3, 2) + mua * d(3, 2, 1, 0))
+		        /**--------------------------------------**/ /
+		                       d(3, 2, 3, 2);
+
+
+		const P01 = P1.clone().sub(P0);
+		const P23 = P3.clone().sub(P2);
+		
+		const Pa = P0.clone().add(P01.multiplyScalar(mua));
+		const Pb = P2.clone().add(P23.multiplyScalar(mub));
+
+		const center = Pa.clone().add(Pb).multiplyScalar(0.5);
+
+		return center;
+	}
+
+	static computeCircleCenter(A, B, C){
+		const AB = B.clone().sub(A);
+		const AC = C.clone().sub(A);
+
+		const N = AC.clone().cross(AB).normalize();
+
+		const ab_dir = AB.clone().cross(N).normalize();
+		const ac_dir = AC.clone().cross(N).normalize();
+
+		const ab_origin = A.clone().add(B).multiplyScalar(0.5);
+		const ac_origin = A.clone().add(C).multiplyScalar(0.5);
+
+		const P0 = ab_origin;
+		const P1 = ab_origin.clone().add(ab_dir);
+
+		const P2 = ac_origin;
+		const P3 = ac_origin.clone().add(ac_dir);
+
+		const center = Utils.lineToLineIntersection(P0, P1, P2, P3);
+
+		return center;
+
+		// Potree.Utils.debugLine(viewer.scene.scene, P0, P1, 0x00ff00);
+		// Potree.Utils.debugLine(viewer.scene.scene, P2, P3, 0x0000ff);
+
+		// Potree.Utils.debugSphere(viewer.scene.scene, center, 0.03, 0xff00ff);
+
+		// const radius = center.distanceTo(A);
+		// Potree.Utils.debugCircle(viewer.scene.scene, center, radius, new THREE.Vector3(0, 0, 1), 0xff00ff);
+	}
+
+	static getNorthVec(p1, distance, projection){
+		if(projection){
+			// if there is a projection, transform coordinates to WGS84
+			// and compute angle to north there
+
+			proj4.defs("pointcloud", projection);
+			const transform = proj4("pointcloud", "WGS84");
+
+			const llP1 = transform.forward(p1.toArray());
+			let llP2 = transform.forward([p1.x, p1.y + distance]);
+			const polarRadius = Math.sqrt((llP2[0] - llP1[0]) ** 2 + (llP2[1] - llP1[1]) ** 2);
+			llP2 = [llP1[0], llP1[1] + polarRadius];
+
+			const northVec = transform.inverse(llP2);
+			
+			return new THREE.Vector3(...northVec, p1.z).sub(p1);
+		}else{
+			// if there is no projection, assume [0, 1, 0] as north direction
+
+			const vec = new THREE.Vector3(0, 1, 0).multiplyScalar(distance);
+			
+			return vec;
+		}
+	}
+
+	static computeAzimuth(p1, p2, projection){
+
+		let azimuth = 0;
+
+		if(projection){
+			// if there is a projection, transform coordinates to WGS84
+			// and compute angle to north there
+
+			let transform;
+
+			if (projection.includes('EPSG')) {
+				transform = proj4(projection, "WGS84");
+			} else {
+				proj4.defs("pointcloud", projection);
+				transform = proj4("pointcloud", "WGS84");
+			}
+
+			const llP1 = transform.forward(p1.toArray());
+			const llP2 = transform.forward(p2.toArray());
+			const dir = [
+				llP2[0] - llP1[0],
+				llP2[1] - llP1[1],
+			];
+			azimuth = Math.atan2(dir[1], dir[0]) - Math.PI / 2;
+		}else{
+			// if there is no projection, assume [0, 1, 0] as north direction
+
+			const dir = [p2.x - p1.x, p2.y - p1.y];
+			azimuth = Math.atan2(dir[1], dir[0]) - Math.PI / 2;
+		}
+
+		// make clockwise
+		azimuth = -azimuth;
+
+		return azimuth;
 	}
 
 	static async loadScript(url){

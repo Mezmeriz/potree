@@ -54,7 +54,7 @@ export class PointCloudEptGeometry {
 		this.offset = U.toVector3([0, 0, 0]);
 		this.boundingSphere = U.sphereFrom(this.boundingBox);
 		this.tightBoundingSphere = U.sphereFrom(this.tightBoundingBox);
-		this.version = new Version('1.6');
+		this.version = new Potree.Version('1.7');
 
 		this.projection = null;
 		this.fallbackProjection = null;

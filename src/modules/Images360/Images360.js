@@ -1,6 +1,7 @@
 
 import { EventDispatcher } from "../../EventDispatcher.js";
 import {Utils} from '../../utils.js'
+import {TextSprite} from "../../TextSprite.js";
 
 let sg = new THREE.SphereGeometry(1, 8, 8);
 let sgHigh = new THREE.SphereGeometry(1, 128, 128);
@@ -10,6 +11,11 @@ let smHovered = new THREE.MeshBasicMaterial({side: THREE.BackSide, color: 0xff00
 
 let raycaster = new THREE.Raycaster();
 let currentlyHovered = null;
+
+// let label = new TextSprite("...");
+// label.visible = false;
+
+// window.dbg = label;
 
 class Image360{
 
@@ -42,6 +48,7 @@ export class Images360 extends EventDispatcher{
 		this.sphere.visible = false;
 		this.sphere.scale.set(1000, 1000, 1000);
 		this.node.add(this.sphere);
+		// this.node.add(label);
 
 		this.focusedImage = null;
 
@@ -175,18 +182,23 @@ export class Images360 extends EventDispatcher{
 
 		let ray = Utils.mouseToRay(mouse, camera, domElement.clientWidth, domElement.clientHeight);
 
-		let tStart = performance.now();
+		// let tStart = performance.now();
 		raycaster.ray.copy(ray);
 		let intersections = raycaster.intersectObjects(this.node.children);
 
 		if(intersections.length === 0){
+			// label.visible = false;
+
 			return;
 		}
 
 		let intersection = intersections[0];
 		currentlyHovered = intersection.object;
-
 		currentlyHovered.material = smHovered;
+
+		//label.visible = true;
+		//label.setText(currentlyHovered.image360.file);
+		//currentlyHovered.getWorldPosition(label.position);
 	}
 
 	update(){

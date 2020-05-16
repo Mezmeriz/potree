@@ -1215,10 +1215,12 @@ export class Viewer extends EventDispatcher{
 		});
 		//this.renderer.domElement.focus();
 
+		// NOTE: If extension errors occur, pass the string into this.renderer.extensions.get(x) before enabling
 		// enable frag_depth extension for the interpolation shader, if available
 		let gl = this.renderer.getContext();
 		gl.getExtension('EXT_frag_depth');
 		gl.getExtension('WEBGL_depth_texture');
+		gl.getExtension('WEBGL_color_buffer_float'); 	// Enable explicitly for more portability, EXT_color_buffer_float is the proper name in WebGL 2
 		
 		//if(gl instanceof WebGLRenderingContext){
 			let extVAO = gl.getExtension('OES_vertex_array_object');
@@ -1646,10 +1648,15 @@ export class Viewer extends EventDispatcher{
 				boxes.push(...profile.boxes);
 			}
 			
-			let clipBoxes = boxes.map( box => {
+			// Needed for .getInverse(), pre-empt a determinant of 0, see #815 / #816
+			let degenerate = (box) => box.matrixWorld.determinant() !== 0;
+			
+			let clipBoxes = boxes.filter(degenerate).map( box => {
 				box.updateMatrixWorld();
+				
 				let boxInverse = new THREE.Matrix4().getInverse(box.matrixWorld);
 				let boxPosition = box.getWorldPosition(new THREE.Vector3());
+
 				return {box: box, inverse: boxInverse, position: boxPosition};
 			});
 
