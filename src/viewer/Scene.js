@@ -398,17 +398,21 @@ export class Scene extends EventDispatcher{
 		}
 	}
 
+	removeAll(){
+		this.removeAllMeasurements();
+		this.removeAllProfiles();
+		this.removeAllClipVolumes();
+	}
+
 	removeAllMeasurements () {
 		while (this.measurements.length > 0) {
 			this.removeMeasurement(this.measurements[0]);
 		}
+	}
 
+	removeAllProfiles() {
 		while (this.profiles.length > 0) {
 			this.removeProfile(this.profiles[0]);
-		}
-
-		while (this.volumes.length > 0) {
-			this.removeVolume(this.volumes[0]);
 		}
 	}
 
