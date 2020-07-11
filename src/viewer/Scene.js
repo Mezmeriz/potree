@@ -190,12 +190,12 @@ export class Scene extends EventDispatcher{
 		this.photoSpheres.forEach(sphere => this.removePhotosphere(sphere));
 	}
 
-	addMesh(mesh) {
-		mesh.material.transparent = true;
-		this.scene.add(mesh);
+	addGeometry(geometry) {
+		geometry.material.transparent = true;
+		this.scene.add(geometry);
 		this.dispatchEvent( {
-			type: 'mesh_added',
-			mesh: mesh
+			type: 'geometry_added',
+			mesh: geometry
 		});
 	}
 
