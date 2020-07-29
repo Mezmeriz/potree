@@ -1,6 +1,5 @@
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../PointCloudOctreeGeometry.js";
 import {Version} from "../Version.js";
-import {XHRFactory} from "../XHRFactory.js";
 import {LasLazLoader} from "./LasLazLoader.js";
 import {BinaryLoader} from "./BinaryLoader.js";
 import {Utils} from "../utils.js";
