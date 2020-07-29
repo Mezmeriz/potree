@@ -5,12 +5,7 @@ import {nodes} from '../Nodes.js';
 export class BinaryLoader {
 
     constructor(version, boundingBox, scale, httpClient) {
-        if (typeof (version) === 'string') {
-            this.version = new Version(version);
-        } else {
-            this.version = version;
-        }
-
+        this.version = typeof (version) === 'string' ? new Version(version) : version;
         this.boundingBox = boundingBox;
         this.scale = scale;
         this.httpClient = httpClient;
