@@ -1,133 +1,131 @@
-
-
 import {Version} from "../Version.js";
 import {XHRFactory} from "../XHRFactory.js";
 import {resourcePath, workerPool} from '../Potree.js';
 import {nodes} from '../Nodes.js';
 
-export class BinaryLoader{
+export class BinaryLoader {
 
-	constructor(version, boundingBox, scale, httpClient){
-		if (typeof (version) === 'string') {
-			this.version = new Version(version);
-		} else {
-			this.version = version;
-		}
+    constructor(version, boundingBox, scale, httpClient) {
+        if (typeof (version) === 'string') {
+            this.version = new Version(version);
+        } else {
+            this.version = version;
+        }
 
-		this.boundingBox = boundingBox;
-		this.scale = scale;
-		this.httpClient = httpClient;
-	}
+        this.boundingBox = boundingBox;
+        this.scale = scale;
+        this.httpClient = httpClient;
+    }
 
-	load(node){
-		if (node.loaded) {
-			return;
-		}
+    load(node) {
+        if (node.loaded) {
+            return;
+        }
 
-		let url = node.getURL();
+        let url = node.getURL();
 
-		if (this.version.equalOrHigher('1.4')) {
-			url += '.bin';
-		}
-		
-		this.httpClient.get(url, {responseType: 'arraybuffer'}).subscribe(data => {this.parse(node, data)});
-	};
+        if (this.version.equalOrHigher('1.4')) {
+            url += '.bin';
+        }
 
-	parse(node, buffer){
-		let pointAttributes = node.pcoGeometry.pointAttributes;
-		let numPoints = buffer.byteLength / node.pcoGeometry.pointAttributes.byteSize;
+        this.httpClient.get(url, {responseType: 'arraybuffer'}).subscribe(data => {
+            this.parse(node, data)
+        });
+    };
 
-		if (this.version.upTo('1.5')) {
-			node.numPoints = numPoints;
-		}
+    parse(node, buffer) {
+        let pointAttributes = node.pcoGeometry.pointAttributes;
+        let numPoints = buffer.byteLength / node.pcoGeometry.pointAttributes.byteSize;
 
-		let workerPath = resourcePath + '/workers/BinaryDecoderWorker.min.js';
-		let worker = workerPool.getWorker(workerPath);
+        if (this.version.upTo('1.5')) {
+            node.numPoints = numPoints;
+        }
 
-		worker.onmessage = function (e) {
+        let workerPath = resourcePath + '/workers/BinaryDecoderWorker.min.js';
+        let worker = workerPool.getWorker(workerPath);
 
-			let data = e.data;
-			let buffers = data.attributeBuffers;
-			let tightBoundingBox = new THREE.Box3(
-				new THREE.Vector3().fromArray(data.tightBoundingBox.min),
-				new THREE.Vector3().fromArray(data.tightBoundingBox.max)
-			);
+        worker.onmessage = function (e) {
 
-			workerPool.returnWorker(workerPath, worker);
+            let data = e.data;
+            let buffers = data.attributeBuffers;
+            let tightBoundingBox = new THREE.Box3(
+                new THREE.Vector3().fromArray(data.tightBoundingBox.min),
+                new THREE.Vector3().fromArray(data.tightBoundingBox.max)
+            );
 
-			let geometry = new THREE.BufferGeometry();
+            workerPool.returnWorker(workerPath, worker);
 
-			for(let property in buffers){
-				let buffer = buffers[property].buffer;
-				let batchAttribute = buffers[property].attribute;
+            let geometry = new THREE.BufferGeometry();
 
-				if (property === "POSITION_CARTESIAN") {
-					geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
-				} else if (property === "rgba") {
-					geometry.addAttribute("rgba", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
-				} else if (property === "NORMAL_SPHEREMAPPED") {
-					geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
-				} else if (property === "NORMAL_OCT16") {
-					geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
-				} else if (property === "NORMAL") {
-					geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
-				} else if (property === "INDICES") {
-					let bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
-					bufferAttribute.normalized = true;
-					geometry.addAttribute('indices', bufferAttribute);
-				} else if (property === "SPACING") {
-					let bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
-					geometry.addAttribute('spacing', bufferAttribute);
-				} else {
-					const bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
-					bufferAttribute.potree = {
-						offset: buffers[property].offset,
-						scale: buffers[property].scale,
-						preciseBuffer: buffers[property].preciseBuffer,
-						range: batchAttribute.range,
-					};
+            for (let property in buffers) {
+                let buffer = buffers[property].buffer;
+                let batchAttribute = buffers[property].attribute;
 
-					geometry.addAttribute(property, bufferAttribute);
+                if (property === "POSITION_CARTESIAN") {
+                    geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+                } else if (property === "rgba") {
+                    geometry.addAttribute("rgba", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+                } else if (property === "NORMAL_SPHEREMAPPED") {
+                    geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+                } else if (property === "NORMAL_OCT16") {
+                    geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+                } else if (property === "NORMAL") {
+                    geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+                } else if (property === "INDICES") {
+                    let bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
+                    bufferAttribute.normalized = true;
+                    geometry.addAttribute('indices', bufferAttribute);
+                } else if (property === "SPACING") {
+                    let bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
+                    geometry.addAttribute('spacing', bufferAttribute);
+                } else {
+                    const bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
+                    bufferAttribute.potree = {
+                        offset: buffers[property].offset,
+                        scale: buffers[property].scale,
+                        preciseBuffer: buffers[property].preciseBuffer,
+                        range: batchAttribute.range,
+                    };
 
-					const attribute = pointAttributes.attributes.find(a => a.name === batchAttribute.name);
-					attribute.range[0] = Math.min(attribute.range[0], batchAttribute.range[0]);
-					attribute.range[1] = Math.max(attribute.range[1], batchAttribute.range[1]);
+                    geometry.addAttribute(property, bufferAttribute);
 
-					if(node.getLevel() === 0){
-						attribute.initialRange = batchAttribute.range;
-					}
-				}
-			}
+                    const attribute = pointAttributes.attributes.find(a => a.name === batchAttribute.name);
+                    attribute.range[0] = Math.min(attribute.range[0], batchAttribute.range[0]);
+                    attribute.range[1] = Math.max(attribute.range[1], batchAttribute.range[1]);
 
-			tightBoundingBox.max.sub(tightBoundingBox.min);
-			tightBoundingBox.min.set(0, 0, 0);
+                    if (node.getLevel() === 0) {
+                        attribute.initialRange = batchAttribute.range;
+                    }
+                }
+            }
 
-			let numPoints = e.data.buffer.byteLength / pointAttributes.byteSize;
-			
-			node.numPoints = numPoints;
-			node.geometry = geometry;
-			node.mean = new THREE.Vector3(...data.mean);
-			node.tightBoundingBox = tightBoundingBox;
-			node.loaded = true;
-			node.loading = false;
-			node.estimatedSpacing = data.estimatedSpacing;
-			nodes.decNodesLoading();
-		};
+            tightBoundingBox.max.sub(tightBoundingBox.min);
+            tightBoundingBox.min.set(0, 0, 0);
 
-		let message = {
-			buffer: buffer,
-			pointAttributes: pointAttributes,
-			version: this.version.version,
-			min: [ node.boundingBox.min.x, node.boundingBox.min.y, node.boundingBox.min.z ],
-			offset: [node.pcoGeometry.offset.x, node.pcoGeometry.offset.y, node.pcoGeometry.offset.z],
-			scale: this.scale,
-			spacing: node.spacing,
-			hasChildren: node.hasChildren,
-			name: node.name
-		};
-		worker.postMessage(message, [message.buffer]);
-	};
+            let numPoints = e.data.buffer.byteLength / pointAttributes.byteSize;
 
-	
+            node.numPoints = numPoints;
+            node.geometry = geometry;
+            node.mean = new THREE.Vector3(...data.mean);
+            node.tightBoundingBox = tightBoundingBox;
+            node.loaded = true;
+            node.loading = false;
+            node.estimatedSpacing = data.estimatedSpacing;
+            nodes.decNodesLoading();
+        };
+
+        let message = {
+            buffer: buffer,
+            pointAttributes: pointAttributes,
+            version: this.version.version,
+            min: [node.boundingBox.min.x, node.boundingBox.min.y, node.boundingBox.min.z],
+            offset: [node.pcoGeometry.offset.x, node.pcoGeometry.offset.y, node.pcoGeometry.offset.z],
+            scale: this.scale,
+            spacing: node.spacing,
+            hasChildren: node.hasChildren,
+            name: node.name
+        };
+        worker.postMessage(message, [message.buffer]);
+    };
 }
 
