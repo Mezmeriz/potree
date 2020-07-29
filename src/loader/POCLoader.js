@@ -122,11 +122,6 @@ export class POCLoader {
         //let xhr = XHRFactory.createXMLHttpRequest();
         //xhr.open('GET', url, true);
         try {
-            httpClient.get(url, {
-                withCredentials: true,
-                responseType: 'json'
-            }).subscribe(data => onComplete(data));
-
             let onComplete = function (data) {
 
                 let fMno = JSON.parse(data);
@@ -176,7 +171,7 @@ export class POCLoader {
                     pco.loader = new LasLazLoader(fMno.version, "laz");
                     pco.pointAttributes = lasLazAttributes(fMno);
                 } else {
-                    pco.loader = new BinaryLoader(fMno.version, boundingBox, fMno.scale);
+                    pco.loader = new BinaryLoader(fMno.version, boundingBox, fMno.scale, httpClient);
                     pco.pointAttributes = parseAttributes(fMno);
                 }
 
@@ -185,7 +180,7 @@ export class POCLoader {
                 { // load root
                     let name = 'r';
 
-                    let root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+                    let root = new PointCloudOctreeGeometryNode(name, pco, boundingBox, httpClient);
                     root.level = 0;
                     root.hasChildren = true;
                     root.spacing = pco.spacing;
@@ -210,7 +205,7 @@ export class POCLoader {
                         let level = name.length - 1;
                         let boundingBox = Utils.createChildAABB(parentNode.boundingBox, index);
 
-                        let node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+                        let node = new PointCloudOctreeGeometryNode(name, pco, boundingBox, httpClient);
                         node.level = level;
                         node.numPoints = numPoints;
                         node.spacing = pco.spacing / Math.pow(2, level);
@@ -222,13 +217,11 @@ export class POCLoader {
                 pco.nodes = nodes;
                 callback(pco);
             }
-            let onError = function (error) {
-                console.log("loading failed: '" + url + "'");
-                console.log(error);
-                callback();
-            }
-        }
-        catch(e){
+
+            return httpClient.get(url, {responseType: 'text'}).subscribe(data => {
+                onComplete(data)
+            });
+        } catch (error) {
             console.log("loading failed: '" + url + "'");
             console.log(error);
             callback();

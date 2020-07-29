@@ -7,7 +7,7 @@ import {nodes} from '../Nodes.js';
 
 export class BinaryLoader{
 
-	constructor(version, boundingBox, scale){
+	constructor(version, boundingBox, scale, httpClient){
 		if (typeof (version) === 'string') {
 			this.version = new Version(version);
 		} else {
@@ -16,6 +16,7 @@ export class BinaryLoader{
 
 		this.boundingBox = boundingBox;
 		this.scale = scale;
+		this.httpClient = httpClient;
 	}
 
 	load(node){
@@ -28,28 +29,8 @@ export class BinaryLoader{
 		if (this.version.equalOrHigher('1.4')) {
 			url += '.bin';
 		}
-
-		let xhr = XHRFactory.createXMLHttpRequest();
-		xhr.open('GET', url, true);
-		xhr.responseType = 'arraybuffer';
-		xhr.overrideMimeType('text/plain; charset=x-user-defined');
-		xhr.onreadystatechange = () => {
-			if (xhr.readyState === 4) {
-				if((xhr.status === 200 || xhr.status === 0) &&  xhr.response !== null){
-					let buffer = xhr.response;
-					this.parse(node, buffer);
-				} else {
-					//console.error(`Failed to load file! HTTP status: ${xhr.status}, file: ${url}`);
-					throw new Error(`Failed to load file! HTTP status: ${xhr.status}, file: ${url}`);
-				}
-			}
-		};
 		
-		try {
-			xhr.send(null);
-		} catch (e) {
-			console.log('fehler beim laden der punktwolke: ' + e);
-		}
+		this.httpClient.get(url, {responseType: 'arraybuffer'}).subscribe(data => {this.parse(node, data)});
 	};
 
 	parse(node, buffer){

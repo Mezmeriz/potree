@@ -23,7 +23,7 @@ export class PointCloudOctreeGeometry{
 
 export class PointCloudOctreeGeometryNode extends PointCloudTreeNode{
 
-	constructor(name, pcoGeometry, boundingBox){
+	constructor(name, pcoGeometry, boundingBox, httpClient){
 		super();
 
 		this.id = PointCloudOctreeGeometryNode.IDCount++;
@@ -38,6 +38,7 @@ export class PointCloudOctreeGeometryNode extends PointCloudTreeNode{
 		this.level = null;
 		this.loaded = false;
 		this.oneTimeDisposeHandlers = [];
+		this.httpClient = httpClient;
 	}
 
 	isGeometryNode(){
@@ -211,9 +212,9 @@ export class PointCloudOctreeGeometryNode extends PointCloudTreeNode{
 		if ((node.level % node.pcoGeometry.hierarchyStepSize) === 0) {
 			// let hurl = node.pcoGeometry.octreeDir + "/../hierarchy/" + node.name + ".hrc";
 			let hurl = node.pcoGeometry.octreeDir + '/' + node.getHierarchyPath() + '/' + node.name + '.hrc';
-
-			let xhr = XHRFactory.createXMLHttpRequest();
-			xhr.open('GET', hurl, true);
+			this.httpClient.get(hurl, {responseType: 'arraybuffer'}).subscribe( data => {
+			    callback(node, data)
+			});
 			xhr.responseType = 'arraybuffer';
 			xhr.overrideMimeType('text/plain; charset=x-user-defined');
 			xhr.onreadystatechange = () => {
