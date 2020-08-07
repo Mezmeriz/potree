@@ -72,6 +72,7 @@ export class AnnotationTool extends EventDispatcher {
             annotation.installHandles(this.viewer);
             this.sphere.removeEventListener("drag", drag);
             this.sphere.removeEventListener("drop", drop);
+            this.viewer.scene.dispatchEvent({type: 'annotation_added', annotation: annotation});
         };
 
         this.sphere.addEventListener('drag', drag);
