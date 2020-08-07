@@ -1,3 +1,4 @@
+
 import {Annotation} from "../Annotation";
 import {Mouse} from '../utils/Mouse.js';
 import {EventDispatcher} from "../EventDispatcher.js";
@@ -9,26 +10,11 @@ export class AnnotationTool extends EventDispatcher {
         this.viewer = viewer;
         this.renderer = viewer.renderer;
 
-        this.addEventListener('start_inserting_annotation', e => {
-            this.viewer.dispatchEvent({
-                type: 'cancel_insertions'
-            });
-        });
-
         this.sphereGeometry = new THREE.SphereGeometry(0.1);
         this.sphereMesh = new THREE.MeshNormalMaterial();
         this.sphere = new THREE.Mesh(this.sphereGeometry, this.sphereMesh);
    }
 
-    onSceneChange(e){
-		if(e.oldScene){
-			e.oldScene.removeEventListener('annotation_added', this.onAdd);
-			e.oldScene.removeEventListener('annotation_removed', this.onRemove);
-		}
-
-		e.scene.addEventListener('annotation_added', this.onAdd);
-		e.scene.addEventListener('annotation_removed', this.onRemove);
-	}
 
     startInsertion(args = {}) {
         let domElement = this.viewer.renderer.domElement;
@@ -77,12 +63,13 @@ export class AnnotationTool extends EventDispatcher {
 
             if (I) {
                 this.sphere.position.copy(I.location);
-
                 annotation.position.copy(I.location);
             }
         };
 
         let drop = (e) => {
+            this.viewer.scene.scene.remove(this.sphere);
+            annotation.installHandles(this.viewer);
             this.sphere.removeEventListener("drag", drag);
             this.sphere.removeEventListener("drop", drop);
         };
@@ -93,18 +80,21 @@ export class AnnotationTool extends EventDispatcher {
         this.viewer.scene.scene.add(this.sphere);
         this.viewer.inputHandler.startDragging(this.sphere);
 
-        return annotation;
-    }
+		return annotation;
+	}
 
-    update() {
-        let annotations = this.viewer.scene.annotations;
-        for (let annotation of annotations) {
-            annotation.update();
-        }
+	update(){
+		// let camera = this.viewer.scene.getActiveCamera();
+		// let domElement = this.renderer.domElement;
+		// let measurements = this.viewer.scene.measurements;
 
-    }
+		// const renderAreaSize = this.renderer.getSize(new THREE.Vector2());
+		// let clientWidth = renderAreaSize.width;
+		// let clientHeight = renderAreaSize.height;
 
-    render(params) {
-        this.viewer.renderer.render(this.scene, this.viewer.scene.getActiveCamera());
-    }
+	}
+
+	render(){
+		//this.viewer.renderer.render(this.scene, this.viewer.scene.getActiveCamera());
+	}
 };

@@ -169,6 +169,7 @@ export class Annotation extends EventDispatcher {
 		};
 
 		$(viewer.renderArea).append(domElement);
+		$(viewer.renderArea).append(this.domElement);
 
 
 		let annotationStartPos = this.position.clone();
