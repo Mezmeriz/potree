@@ -81,7 +81,7 @@ function loadPointCloud(viewer, data){
 	return promise;
 }
 
-export function loadPointCloudData(path, name, callback){
+export function loadPointCloudData(path, name, httpClient, callback){
 	let loaded = function(pointcloud){
 		pointcloud.name = name;
 		callback({type: 'pointcloud_loaded', pointcloud: pointcloud});
@@ -101,7 +101,7 @@ export function loadPointCloudData(path, name, callback){
 			}
 		});
 	} else if (path.indexOf('cloud.js') > 0) {
-		POCLoader.load(path, function (geometry) {
+		POCLoader.load(path, httpClient,  function (geometry) {
 			if (!geometry) {
 				//callback({type: 'loading_failed'});
 				console.error(new Error(`failed to load point cloud from URL: ${path}`));
