@@ -46,6 +46,7 @@ export class Annotation extends EventDispatcher {
 
 		let iconClose = resourcePath + '/icons/close.svg';
 
+		this.handleDomElement = null;
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
 				<div class="annotation-titlebar">
@@ -167,6 +168,8 @@ export class Annotation extends EventDispatcher {
 			domElement.css("top", `${start.y}px`);
 
 		};
+
+		this.handleDomElement = domElement;
 
 		$(viewer.renderArea).append(domElement);
 		$(viewer.renderArea).append(this.domElement);
@@ -308,9 +311,15 @@ export class Annotation extends EventDispatcher {
 		if (display) {
 			// this.domElement.fadeIn(200);
 			this.domElement.show();
+			if(Boolean(this.handleDomElement)){
+				this.handleDomElement.show();
+			}
 		} else {
 			// this.domElement.fadeOut(200);
 			this.domElement.hide();
+			if(Boolean(this.handleDomElement)){
+				this.handleDomElement.hide();
+			}
 		}
 	}
 
