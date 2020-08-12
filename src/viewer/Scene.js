@@ -192,10 +192,6 @@ export class Scene extends EventDispatcher{
 
 	addSprite(sprite) {
 		this.scene.add(sprite);
-		this.dispatchEvent({
-			type: 'sprite_added',
-			sprite: sprite
-		})
 	}
 
 	addGeometry(geometry) {
