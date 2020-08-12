@@ -268,6 +268,21 @@ a:hover, a:visited, a:link, a:active{
 	white-space:	nowrap;
 }
 
+.annotation-label{
+	display:		inline-block;
+	height:			100%;
+	flex-grow:		1;
+	user-select:	none;
+	-moz-user-select: none;
+	z-index:		100;
+	vertical-align:	middle;
+	line-height:	1.5em;
+	font-family:	Arial;
+	font-weight:	bold;
+	cursor: 		pointer;
+	white-space:	nowrap;
+}
+
 .annotation-description{
 	position:		relative;
 	color:			white;
@@ -287,9 +302,12 @@ a:hover, a:visited, a:link, a:active{
 	margin:			0px 0px 8px 8px;
 }
 
-	
 .annotation-description-content{
-	color:			white;
+	flex-grow:		1;
+	user-select:	none;
+	-moz-user-select: none;
+	cursor: 		pointer;
+	white-space:	nowrap;
 }
 
 .annotation-icon{

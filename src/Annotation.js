@@ -34,6 +34,7 @@ export class Annotation extends EventDispatcher {
 		this.showDescription = true;
 		this.actions = args.actions || [];
 		this.isHighlighted = false;
+		this.clickedVisible = false;
 		this._visible = true;
 		this.__visible = true;
 		this._display = true;
@@ -51,22 +52,19 @@ export class Annotation extends EventDispatcher {
 			<div class="annotation" oncontextmenu="return false;">
 				<div class="annotation-titlebar">
 					<span class="annotation-label"></span>
-				</div>
-				<div class="annotation-description">
 					<span class="annotation-description-close">
 						<img src="${iconClose}" width="16px">
 					</span>
-					<span class="annotation-description-content">${this._description}</span>
+					<div class="annotation-description-content">${this._description}</div>
 				</div>
 			</div>
 		`);
 
 		this.elTitlebar = this.domElement.find('.annotation-titlebar');
 		this.elTitle = this.elTitlebar.find('.annotation-label');
+		this.elTitleClose = this.elTitlebar.find('.annotation-description-close');
 		this.elTitle.append(this._title);
-		this.elDescription = this.domElement.find('.annotation-description');
-		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
-		// this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
+		this.elDescription = this.elTitlebar.find('.annotation-description-content');
 
 		this.clickTitle = () => {
 			if(this.hasView()){
@@ -98,12 +96,30 @@ export class Annotation extends EventDispatcher {
 			elButton.click(() => action.onclick({annotation: this}));
 		}
 
-		this.elDescriptionClose.hover(
-			e => this.elDescriptionClose.css('opacity', '1'),
-			e => this.elDescriptionClose.css('opacity', '0.5')
+		this.elTitleClose.hover(
+			e => this.elTitleClose.css('opacity', '1'),
+			e => this.elTitleClose.css('opacity', '0.5')
 		);
-		this.elDescriptionClose.click(e => this.setHighlighted(false));
+
+		this.elTitleClose.click(e => {
+			this.remove(this)
+			this.dispatchEvent({
+				type: 'annotation_removed',
+				annotation: this
+			});
+		});
 		// this.elDescriptionContent.html(this._description);
+
+		this.domElement.hover(
+			e => this.setHighlighted(true),
+			e => this.setHighlighted(false)
+		);
+		this.domElement.click(
+			e => {
+				this.clickedVisible = !this.clickedVisible;
+				this.setHighlighted(true);
+			}
+		);
 
 		this.domElement.mouseenter(e => this.setHighlighted(true));
 		this.domElement.mouseleave(e => this.setHighlighted(false));
@@ -505,8 +521,10 @@ export class Annotation extends EventDispatcher {
 			this.domElement.css('opacity', '0.5');
 			this.elTitlebar.css('box-shadow', '');
 			this.domElement.css('z-index', '100');
-			this.descriptionVisible = false;
-			this.elDescription.css('display', 'none');
+			if(!this.clickedVisible) {
+				this.descriptionVisible = false;
+				this.elDescription.css('display', 'none');
+			}
 		}
 
 		this.isHighlighted = highlighted;
