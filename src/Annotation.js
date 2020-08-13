@@ -45,17 +45,28 @@ export class Annotation extends EventDispatcher {
 		this.parent = null;
 		this.boundingBox = new THREE.Box3();
 
+		let annotationIcon = resourcePath + '/icons/annotation.svg';
 		let iconClose = resourcePath + '/icons/close.svg';
 
 		this.handleDomElement = null;
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
-				<div class="annotation-titlebar">
-					<span class="annotation-label"></span>
+				<div>
+					<span class="annotation-icon">
+						<img src="${annotationIcon}">
+					</span>
+				</div>
+				<div class="annotation-description">
 					<span class="annotation-description-close">
 						<img src="${iconClose}" width="16px">
 					</span>
-					<div class="annotation-description-content">${this._description}</div>
+					<div class="annotation-titlebar">
+					<span class="annotation-label">
+					
+					</span>
+					</div> 
+					<hr>
+					<span class="annotation-description-content">${this._description}</span>
 				</div>
 			</div>
 		`);
@@ -64,7 +75,9 @@ export class Annotation extends EventDispatcher {
 		this.elTitle = this.elTitlebar.find('.annotation-label');
 		this.elTitleClose = this.elTitlebar.find('.annotation-description-close');
 		this.elTitle.append(this._title);
-		this.elDescription = this.elTitlebar.find('.annotation-description-content');
+		this.elDescription = this.domElement.find('.annotation-description');
+		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
+		this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
 
 		this.clickTitle = () => {
 			if(this.hasView()){
@@ -73,7 +86,7 @@ export class Annotation extends EventDispatcher {
 			this.dispatchEvent({type: 'click', target: this});
 		};
 
-		this.elTitle.click(this.clickTitle);
+		// this.elTitle.click(this.clickTitle);
 
 		this.actions = this.actions.map(a => {
 			if (a instanceof Action) {
@@ -108,21 +121,12 @@ export class Annotation extends EventDispatcher {
 				annotation: this
 			});
 		});
-		// this.elDescriptionContent.html(this._description);
 
-		this.domElement.hover(
-			e => this.setHighlighted(true),
-			e => this.setHighlighted(false)
-		);
 		this.domElement.click(
 			e => {
 				this.clickedVisible = !this.clickedVisible;
-				this.setHighlighted(true);
-			}
-		);
-
-		this.domElement.mouseenter(e => this.setHighlighted(true));
-		this.domElement.mouseleave(e => this.setHighlighted(false));
+				this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
+			});
 
 		this.domElement.on('touchstart', e => {
 			this.setHighlighted(!this.isHighlighted);
