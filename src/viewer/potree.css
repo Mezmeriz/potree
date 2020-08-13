@@ -277,11 +277,21 @@ a:hover, a:visited, a:link, a:active{
 	width:			500px;
 }
 
+.annotation-minimize {
+	content: 		"\2212";
+	float: 			right;
+	transform: 		scale(1.4, 4);
+	margin:			5px 0px 0px 8px;
+	cursor: 		pointer;
+	opacity:		0.2;
+}
+
 .annotation-description-close{
 	filter:			invert(100%);
 	float:			right;
-	/*opacity:		0.5;*/
 	margin:			0px 0px 8px 8px;
+	cursor: 		pointer;
+	opacity: 		0.2;
 }
 
 .annotation-description-content{
