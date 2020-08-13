@@ -207,7 +207,7 @@ export class PointCloudOctreeGeometryNode extends PointCloudTreeNode {
         };
         if ((node.level % node.pcoGeometry.hierarchyStepSize) === 0) {
             let hurl = node.pcoGeometry.octreeDir + '/' + node.getHierarchyPath() + '/' + node.name + '.hrc';
-            this.httpClient.get(hurl, {responseType: 'arraybuffer'}).subscribe(data => {
+            this.httpClient.get(hurl, {responseType: 'arraybuffer', withCredentials: true}).subscribe(data => {
                 callback(node, data)
             });
         }

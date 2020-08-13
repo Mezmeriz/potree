@@ -22,7 +22,7 @@ export class BinaryLoader {
             url += '.bin';
         }
 
-        this.httpClient.get(url, {responseType: 'arraybuffer'}).subscribe(data => {
+        this.httpClient.get(url, {responseType: 'arraybuffer', withCredentials: true}).subscribe(data => {
             this.parse(node, data)
         });
     };
