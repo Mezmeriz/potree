@@ -215,7 +215,7 @@ export class POCLoader {
                 callback(pco);
             }
 
-            return httpClient.get(url, {responseType: 'text'}).subscribe(data => {
+            return httpClient.get(url, {responseType: 'text', withCredentials: true}).subscribe(data => {
                 onComplete(data)
             });
         } catch (error) {
