@@ -254,7 +254,7 @@ a:hover, a:visited, a:link, a:active{
 	display:		inline-block;
 	height:			100%;
 	flex-grow:		1;
-	user-select:	none;
+	user-select: none;
 	-moz-user-select: none;
 	z-index:		100;
 	vertical-align:	middle;
@@ -277,13 +277,13 @@ a:hover, a:visited, a:link, a:active{
 	width:			500px;
 }
 
-.annotation-minimize {
-	content: 		"\2212";
-	float: 			right;
-	transform: 		scale(1.4, 4);
-	margin:			5px 0px 0px 8px;
+.annotation-description-minimize {
+	/*filter:			invert(100%);*/
+	float:			right;
+	transform:		scale(1.4, 4);
+	margin:			0px 0px 8px 8px;
 	cursor: 		pointer;
-	opacity:		0.2;
+	opacity: 		0.2;
 }
 
 .annotation-description-close{
@@ -295,11 +295,12 @@ a:hover, a:visited, a:link, a:active{
 }
 
 .annotation-description-content{
+	/*font-family: monospace;*/
+	white-space: pre;
 	flex-grow:		1;
 	user-select:	none;
 	-moz-user-select: none;
 	cursor: 		pointer;
-	white-space:	nowrap;
 }
 
 .annotation-icon{
@@ -308,6 +309,30 @@ a:hover, a:visited, a:link, a:active{
 	margin:		2px 2px;
 }
 
+.annotation-button{
+	border: none;
+	background-color: white;
+	color: black;
+	font-weight: bold;
+	padding: 8px 16px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 12px;
+	margin: 4px 2px;
+	transition-duration: 0.4s;
+	cursor: pointer;
+}
+
+.annotation-button:hover{
+	background-color: #e72599;
+	color: white;
+}
+
+pre {
+	overflow: auto;
+	/*white-space: pre-wrap;*/
+}
 
 canvas { 
 	width: 100%; 
