@@ -1,3 +1,5 @@
+
+
 import {Action} from "./Actions.js";
 import {resourcePath} from "./Potree.js";
 import {Utils} from './utils.js';
@@ -58,15 +60,21 @@ export class Annotation extends EventDispatcher {
 					<span class="annotation-description-close">
 						<img src="${iconClose}" width="16px">
 					</span>
-					<span class="annotation-minimize">&#8722;
+					
+					<span class="annotation-description-minimize">&#8722;
 					</span>
+					
 					<div class="annotation-titlebar">
-						<span class="annotation-label">
-						</span>
+						<span class="annotation-label"></span>
 					</div> 
 					<hr>
-					<span class="annotation-description-content">${this._description}</span>
+					<div class="annotation-description-content">${this._description}</div>
+					<div class="md-form">
+						<textarea id="description" rows="1" cols="50"></textarea>
+					</div>
+					<button class="annotation-button">Submit</button>
 				</div>
+
 			</div>
 		`);
 
@@ -75,8 +83,9 @@ export class Annotation extends EventDispatcher {
 		this.elDescription = this.domElement.find('.annotation-description');
 		this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
 		this.elClose = this.elDescription.find('.annotation-description-close');
-		this.elMinimize = this.elDescription.find('.annotation-minimize');
+		this.elMinimize = this.elDescription.find('.annotation-description-minimize');
 		this.elTitle.append(this._title);
+		this.icon = this.domElement.find('.annotation-icon');
 
 
 		this.clickTitle = () => {
@@ -86,28 +95,28 @@ export class Annotation extends EventDispatcher {
 			this.dispatchEvent({type: 'click', target: this});
 		};
 
-		// this.elTitle.click(this.clickTitle);
+		this.elTitle.click(this.clickTitle);
 
-		this.actions = this.actions.map(a => {
-			if (a instanceof Action) {
-				return a;
-			} else {
-				return new Action(a);
-			}
-		});
-
-		for (let action of this.actions) {
-			action.pairWith(this);
-		}
-
-		let actions = this.actions.filter(
-			a => a.showIn === undefined || a.showIn.includes('scene'));
-
-		for (let action of actions) {
-			let elButton = $(`<img src="${action.icon}" class="annotation-action-icon">`);
-			this.elTitlebar.append(elButton);
-			elButton.click(() => action.onclick({annotation: this}));
-		}
+		// this.actions = this.actions.map(a => {
+		// 	if (a instanceof Action) {
+		// 		return a;
+		// 	} else {
+		// 		return new Action(a);
+		// 	}
+		// });
+		//
+		// for (let action of this.actions) {
+		// 	action.pairWith(this);
+		// }
+		//
+		// let actions = this.actions.filter(
+		// 	a => a.showIn === undefined || a.showIn.includes('scene'));
+		//
+		// for (let action of actions) {
+		// 	let elButton = $(`<img src="${action.icon}" class="annotation-action-icon">`);
+		// 	this.elTitlebar.append(elButton);
+		// 	elButton.click(() => action.onclick({annotation: this}));
+		// }
 
 		this.elClose.hover(
 			e => this.elClose.css('opacity', '1'),
@@ -121,12 +130,12 @@ export class Annotation extends EventDispatcher {
 		// TODO ADD BUTTON TO GIVE elClose and ElMinimize functionality
 
 		// TODO CHANGE THIS CLICK TO NOT GET RID OF THE BOX
-		this.domElement.click(
+		this.icon.click(
 			e => {
 				this.clickedVisible = !this.clickedVisible;
 				this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
 			});
-		
+
 		this.elMinimize.click(e => {
 			this.clickedVisible = !this.clickedVisible;
 			this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
@@ -138,6 +147,12 @@ export class Annotation extends EventDispatcher {
 
 		this.display = false;
 		//this.display = true;
+		// this.button.click(
+		// 	e => {
+		// 		this._description = this.domElement.find('description');
+		// 	}
+		// )
+
 
 	}
 
@@ -147,7 +162,7 @@ export class Annotation extends EventDispatcher {
 		}
 
 		let domElement = $(`
-			<div style="position: absolute; left: 300; top: 200; pointer-events: none">
+			<div style="position: absolute; left: 300%; top: 200%; pointer-events: none">
 				<svg width="300" height="600">
 					<line x1="0" y1="0" x2="1200" y2="200" style="stroke: black; stroke-width:2" />
 					<circle cx="50" cy="50" r="4" stroke="black" stroke-width="2" fill="gray" />
