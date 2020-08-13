@@ -127,9 +127,6 @@ export class Annotation extends EventDispatcher {
 			e => this.elMinimize.css('opacity', '0.5')
 		);
 
-		// TODO ADD BUTTON TO GIVE elClose and ElMinimize functionality
-
-		// TODO CHANGE THIS CLICK TO NOT GET RID OF THE BOX
 		this.icon.click(
 			e => {
 				this.clickedVisible = !this.clickedVisible;
@@ -140,6 +137,15 @@ export class Annotation extends EventDispatcher {
 			this.clickedVisible = !this.clickedVisible;
 			this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
 		});
+
+		this.elClose.click(
+			e => {
+				this.domElement.remove();
+				this.removeHandles(this.handleDomElement);
+				this.scene.dispatchEvent({type: 'annotation_removed', uuid: this.uuid});
+				delete this;
+			}
+		)
 
 		this.domElement.on('touchstart', e => {
 			this.setHighlighted(!this.isHighlighted);
@@ -310,7 +316,7 @@ export class Annotation extends EventDispatcher {
 
 		//$(viewer.renderArea).remove(this.handles.domElement);
 		this.handles.domElement.remove();
-		viewer.removeEventListener("update", this.handles.updateCallback);
+		//viewer.removeEventListener("update", this.handles.updateCallback);
 
 		delete this.handles;
 	}
