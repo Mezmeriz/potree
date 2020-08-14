@@ -194,7 +194,7 @@ export class PointCloudOctreeGeometryNode extends PointCloudTreeNode {
                 let level = name.length - 1;
                 let boundingBox = Utils.createChildAABB(parentNode.boundingBox, index);
 
-                let currentNode = new PointCloudOctreeGeometryNode(name, pco, boundingBox, this.httpClient);
+                let currentNode = new PointCloudOctreeGeometryNode(name, pco, boundingBox, node.httpClient);
                 currentNode.level = level;
                 currentNode.numPoints = decodedNumPoints;
                 currentNode.hasChildren = decoded[i].children > 0;
