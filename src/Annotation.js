@@ -300,6 +300,14 @@ export class Annotation extends EventDispatcher {
 
 		};
 
+		this.scene.addEventListener( 'open_annotation',
+			e => {
+				if(e.uuid === this.uuid) {
+					this.clickedVisible = true;
+					this.setHighlighted(true);
+				}
+			});
+
 		viewer.addEventListener("update", updateCallback);
 
 		this.handles = {
