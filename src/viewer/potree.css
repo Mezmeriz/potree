@@ -273,8 +273,9 @@ a:hover, a:visited, a:link, a:active{
 	margin:			5px;
 	border-radius:	4px;
 	display:		none;
-	/*max-width:		500px;*/
-	/*width:			500px;*/
+	max-height: 	500px;
+	max-width:		500px;
+	width:			500px;
 }
 
 .annotation-description-minimize {
@@ -294,9 +295,9 @@ a:hover, a:visited, a:link, a:active{
 }
 
 .annotation-description-content{
-	/*font-family: monospace;*/
 	border: 1px solid ghostwhite;
 	border-radius: 0.3em;
+	overflow: 		auto;
 	color: white;
 	white-space: pre;
 	flex-grow:		1;
@@ -356,6 +357,10 @@ form {
 .no-outline:focus {
 	outline: none;
 	padding: 10px;
+}
+
+.textarea{
+	font-family: Arial, serif;
 }
 
 pre {

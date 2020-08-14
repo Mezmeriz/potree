@@ -71,7 +71,7 @@ export class Annotation extends EventDispatcher {
 					<div class="annotation-description-content">${this._description}</div>
 					
 					<form id="comment-form">
-						<input type="text" size="50" class="no-outline" name="description" id="input-description" placeholder="Enter Comment">
+						<textarea type="text" rows="4" cols="55" class="no-outline" name="description" id="input-description" placeholder="Enter Comment"></textarea>
 						<button id="submit-button" type="button" class="annotation-button">Submit</button>
 					</form>
 				</div>
@@ -152,6 +152,10 @@ export class Annotation extends EventDispatcher {
 			e => {
 				let comment = this.domElement.find('#input-description').val();
 				this.elDescriptionContent.append('\n' + comment);
+				this.scene.dispatchEvent({
+					type: 'annotation_comment_added',
+					title: this.elTitle,
+					annotation_thread: this.elDescriptionContent});
 			}
 		)
 
