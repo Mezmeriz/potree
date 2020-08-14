@@ -298,12 +298,11 @@ a:hover, a:visited, a:link, a:active{
 	border: 1px solid ghostwhite;
 	border-radius: 0.3em;
 	overflow: 		auto;
-	color: white;
-	white-space: pre;
+	color: 			white;
+	white-space: 	pre;
 	flex-grow:		1;
 	user-select:	none;
 	-moz-user-select: none;
-	cursor: 		pointer;
 	padding: 		10px;
 	height:         100px;
 	max-height:     200px;
@@ -335,12 +334,12 @@ a:hover, a:visited, a:link, a:active{
 	color: white;
 }
 
-input {
+.input {
 	border-top-style: hidden;
 	border-right-style: hidden;
 	border-left-style: hidden;
 	border-bottom-style: groove;
-	background-color: transparent;
+	background-color: black;
 	color: white;
 }
 
@@ -354,12 +353,11 @@ form {
 	height: 0px;
 }
 
-.no-outline:focus {
+.no-outline{
 	outline: none;
 	padding: 10px;
-}
-
-.textarea{
+	background: transparent;
+	color: white;
 	font-family: Arial, serif;
 }
 

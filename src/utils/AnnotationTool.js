@@ -18,11 +18,13 @@ export class AnnotationTool extends EventDispatcher {
 
     startInsertion(args = {}) {
         let domElement = this.viewer.renderer.domElement;
-
+        let userName = args["userName"];
+        console.log("here is the User Name from front: " + userName)
         let annotation = new Annotation({
             position: [-0.7, 6, 7],
             title: "Annotation Title",
-            description: `Annotation Description`
+            description: `Annotation Description`,
+            userName: userName
         });
         this.dispatchEvent({type: 'start_inserting_annotation', annotation: annotation});
 

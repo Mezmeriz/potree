@@ -15,6 +15,9 @@ export class Annotation extends EventDispatcher {
 		this.offset = new THREE.Vector3();
 		this.uuid = THREE.Math.generateUUID();
 		this.commentForm = null;
+		this.userName = args.userName;
+		this.submitCommentClicked = false;
+		this.inputDisabled = false;
 
 		if (!args.position) {
 			this.position = null;
@@ -71,6 +74,7 @@ export class Annotation extends EventDispatcher {
 					<div class="annotation-description-content">${this._description}</div>
 					
 					<form id="comment-form">
+						<input type="text" placeholder="Title" name="title" id="title">
 						<textarea type="text" rows="4" cols="55" class="no-outline" name="description" id="input-description" placeholder="Enter Comment"></textarea>
 						<button id="submit-button" type="button" class="annotation-button">Submit</button>
 					</form>
@@ -87,6 +91,8 @@ export class Annotation extends EventDispatcher {
 		this.elTitle.append(this._title);
 		this.icon = this.domElement.find('.annotation-icon');
 		this.commentForm = this.domElement.find('comment-form');
+		this.titleInput = this.commentForm.find('title');
+		this.textArea = this.commentForm.find('description');
 		this.submitButton = this.domElement.find('#submit-button');
 
 		this.clickTitle = () => {
@@ -97,27 +103,6 @@ export class Annotation extends EventDispatcher {
 		};
 
 		this.elTitle.click(this.clickTitle);
-
-		// this.actions = this.actions.map(a => {
-		// 	if (a instanceof Action) {
-		// 		return a;
-		// 	} else {
-		// 		return new Action(a);
-		// 	}
-		// });
-		//
-		// for (let action of this.actions) {
-		// 	action.pairWith(this);
-		// }
-		//
-		// let actions = this.actions.filter(
-		// 	a => a.showIn === undefined || a.showIn.includes('scene'));
-		//
-		// for (let action of actions) {
-		// 	let elButton = $(`<img src="${action.icon}" class="annotation-action-icon">`);
-		// 	this.elTitlebar.append(elButton);
-		// 	elButton.click(() => action.onclick({annotation: this}));
-		// }
 
 		this.elClose.hover(
 			e => this.elClose.css('opacity', '1'),
@@ -150,12 +135,27 @@ export class Annotation extends EventDispatcher {
 
 		this.submitButton.click(
 			e => {
+				if(!this.submitCommentClicked){
+					this.elDescriptionContent.empty();
+					this.elTitle.empty();
+				}
+
+				this.submitCommentClicked = true;
+				this.domElement.find('#title').attr('disabled', 'disabled')
+				// this.inputDisabled = true;
+
+				let title = this.domElement.find('#title').val();
 				let comment = this.domElement.find('#input-description').val();
-				this.elDescriptionContent.append('\n' + comment);
+
+				this.elTitle.append(title);
+				this.elDescriptionContent.append(this.userName + " : " + comment + '\n' );
+
 				this.scene.dispatchEvent({
 					type: 'annotation_comment_added',
-					title: this.elTitle,
-					annotation_thread: this.elDescriptionContent});
+					title: this.elTitle.text(),
+					annotation_thread: this.elDescriptionContent.text()});
+
+				this.domElement.find('#input-description').val('');
 			}
 		)
 
