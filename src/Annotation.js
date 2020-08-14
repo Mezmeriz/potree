@@ -14,6 +14,7 @@ export class Annotation extends EventDispatcher {
 		this._description = args.description || '';
 		this.offset = new THREE.Vector3();
 		this.uuid = THREE.Math.generateUUID();
+		this.commentForm = null;
 
 		if (!args.position) {
 			this.position = null;
@@ -61,20 +62,19 @@ export class Annotation extends EventDispatcher {
 						<img src="${iconClose}" width="16px">
 					</span>
 					
-					<span class="annotation-description-minimize">&#8722;
-					</span>
+					<span class="annotation-description-minimize">&#8722;</span>
 					
 					<div class="annotation-titlebar">
 						<span class="annotation-label"></span>
 					</div> 
-					<hr>
+					
 					<div class="annotation-description-content">${this._description}</div>
-					<div class="md-form">
-						<textarea id="description" rows="1" cols="50"></textarea>
-					</div>
-					<button class="annotation-button">Submit</button>
+					
+					<form id="comment-form">
+						<input type="text" size="50" class="no-outline" name="description" id="input-description" placeholder="Enter Comment">
+						<button id="submit-button" type="button" class="annotation-button">Submit</button>
+					</form>
 				</div>
-
 			</div>
 		`);
 
@@ -86,10 +86,11 @@ export class Annotation extends EventDispatcher {
 		this.elMinimize = this.elDescription.find('.annotation-description-minimize');
 		this.elTitle.append(this._title);
 		this.icon = this.domElement.find('.annotation-icon');
-
+		this.commentForm = this.domElement.find('comment-form');
+		this.submitButton = this.domElement.find('#submit-button');
 
 		this.clickTitle = () => {
-			if(this.hasView()){
+			if (this.hasView()) {
 				this.moveHere(this.scene.getActiveCamera());
 			}
 			this.dispatchEvent({type: 'click', target: this});
@@ -147,19 +148,18 @@ export class Annotation extends EventDispatcher {
 			}
 		)
 
+		this.submitButton.click(
+			e => {
+				let comment = this.domElement.find('#input-description').val();
+				this.elDescriptionContent.append('\n' + comment);
+			}
+		)
+
 		this.domElement.on('touchstart', e => {
 			this.setHighlighted(!this.isHighlighted);
 		});
 
 		this.display = false;
-		//this.display = true;
-		// this.button.click(
-		// 	e => {
-		// 		this._description = this.domElement.find('description');
-		// 	}
-		// )
-
-
 	}
 
 	installHandles(viewer){
@@ -313,11 +313,7 @@ export class Annotation extends EventDispatcher {
 		if(this.handles === undefined){
 			return;
 		}
-
-		//$(viewer.renderArea).remove(this.handles.domElement);
 		this.handles.domElement.remove();
-		//viewer.removeEventListener("update", this.handles.updateCallback);
-
 		delete this.handles;
 	}
 

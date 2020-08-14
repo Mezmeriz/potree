@@ -195,10 +195,10 @@ a:hover, a:visited, a:link, a:active{
 	color:			white;
 	background-color:	black;
 	border-radius:	0.2em;
-	/*border:			1px solid rgba(255, 255, 255, 0.7);*/
+	border:			1px solid rgba(255, 255, 255, 0.7);
 	font-size:		1em;
 	/*opacity:		1;*/
-	margin:			auto;
+	margin:			8px;
 	display:		table;
 	padding:		8px 8px;
 	cursor: 		pointer;
@@ -270,15 +270,14 @@ a:hover, a:visited, a:link, a:active{
 	color:			white;
 	background-color:	black;
 	padding:		10px;
-	margin:			5px 0px 0px 0px;
+	margin:			5px;
 	border-radius:	4px;
 	display:		none;
-	max-width:		500px;
-	width:			500px;
+	/*max-width:		500px;*/
+	/*width:			500px;*/
 }
 
 .annotation-description-minimize {
-	/*filter:			invert(100%);*/
 	float:			right;
 	transform:		scale(1.4, 4);
 	margin:			0px 0px 8px 8px;
@@ -296,11 +295,17 @@ a:hover, a:visited, a:link, a:active{
 
 .annotation-description-content{
 	/*font-family: monospace;*/
+	border: 1px solid ghostwhite;
+	border-radius: 0.3em;
+	color: white;
 	white-space: pre;
 	flex-grow:		1;
 	user-select:	none;
 	-moz-user-select: none;
 	cursor: 		pointer;
+	padding: 		10px;
+	height:         100px;
+	max-height:     200px;
 }
 
 .annotation-icon{
@@ -314,19 +319,43 @@ a:hover, a:visited, a:link, a:active{
 	background-color: white;
 	color: black;
 	font-weight: bold;
-	padding: 8px 16px;
+	padding: 4px 10px;
 	text-align: center;
 	text-decoration: none;
-	display: inline-block;
-	font-size: 12px;
-	margin: 4px 2px;
-	transition-duration: 0.4s;
+	/*display: */
+	position: relative;
+	margin: 10px 2px;
+	transition-duration: 0.6s;
 	cursor: pointer;
 }
 
 .annotation-button:hover{
 	background-color: #e72599;
 	color: white;
+}
+
+input {
+	border-top-style: hidden;
+	border-right-style: hidden;
+	border-left-style: hidden;
+	border-bottom-style: groove;
+	background-color: transparent;
+	color: white;
+}
+
+form {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.dash{
+	border: 1px solid ghostwhite;
+	height: 0px;
+}
+
+.no-outline:focus {
+	outline: none;
+	padding: 10px;
 }
 
 pre {
