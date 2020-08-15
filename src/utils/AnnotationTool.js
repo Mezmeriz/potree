@@ -3,86 +3,89 @@ import {Annotation} from "../Annotation";
 import {Mouse} from '../utils/Mouse.js';
 import {EventDispatcher} from "../EventDispatcher.js";
 
-export class AnnotationTool extends EventDispatcher{
-	constructor (viewer) {
-		super();
+export class AnnotationTool extends EventDispatcher {
+    constructor(viewer) {
+        super();
 
-		this.viewer = viewer;
-		this.renderer = viewer.renderer;
+        this.viewer = viewer;
+        this.renderer = viewer.renderer;
 
-		this.sg = new THREE.SphereGeometry(0.1);
-		this.sm = new THREE.MeshNormalMaterial();
-		this.s = new THREE.Mesh(this.sg, this.sm);
-	}
+        this.sphereGeometry = new THREE.SphereGeometry(0.1);
+        this.sphereMesh = new THREE.MeshNormalMaterial();
+        this.sphere = new THREE.Mesh(this.sphereGeometry, this.sphereMesh);
+   }
 
-	startInsertion (args = {}) {
-		let domElement = this.viewer.renderer.domElement;
 
-		let annotation = new Annotation({
-			position: [589748.270, 231444.540, 753.675],
-			title: "Annotation Title",
-			description: `Annotation Description`
-		});
-		this.dispatchEvent({type: 'start_inserting_annotation', annotation: annotation});
+    startInsertion(args = {}) {
+        let domElement = this.viewer.renderer.domElement;
+        let userName = args["userName"];
+        console.log("here is the User Name from front: " + userName)
+        let annotation = new Annotation({
+            position: [-0.7, 6, 7],
+            title: "Annotation Title",
+            description: `Annotation Description`,
+            userName: userName
+        });
+        this.dispatchEvent({type: 'start_inserting_annotation', annotation: annotation});
 
-		const annotations = this.viewer.scene.annotations;
-		annotations.add(annotation);
+        const annotations = this.viewer.scene.annotations;
+        annotations.add(annotation);
 
-		let callbacks = {
-			cancel: null,
-			finish: null,
-		};
+        let callbacks = {
+            cancel: null,
+            finish: null,
+        };
 
-		let insertionCallback = (e) => {
-			if (e.button === THREE.MOUSE.LEFT) {
-				callbacks.finish();
-			} else if (e.button === THREE.MOUSE.RIGHT) {
-				callbacks.cancel();
-			}
-		};
+        let insertionCallback = (e) => {
+            if (e.button === THREE.MOUSE.LEFT) {
+                callbacks.finish();
+            } else if (e.button === THREE.MOUSE.RIGHT) {
+                callbacks.cancel();
+            }
+        };
 
-		callbacks.cancel = e => {
-			annotations.remove(annotation);
+        callbacks.cancel = e => {
+            annotations.remove(annotation);
+            domElement.removeEventListener('mouseup', insertionCallback, true);
+        };
 
-			domElement.removeEventListener('mouseup', insertionCallback, true);
-		};
+        callbacks.finish = e => {
+            domElement.removeEventListener('mouseup', insertionCallback, true);
+        };
 
-		callbacks.finish = e => {
-			domElement.removeEventListener('mouseup', insertionCallback, true);
-		};
+        domElement.addEventListener('mouseup', insertionCallback, true);
 
-		domElement.addEventListener('mouseup', insertionCallback, true);
+        let drag = (e) => {
+            let I = Mouse.getMousePointCloudIntersection(
+                e.drag.end,
+                e.viewer.scene.getActiveCamera(),
+                e.viewer,
+                e.viewer.scene.pointclouds,
+                {pickClipped: true});
 
-		let drag = (e) => {
-			let I = Mouse.getMousePointCloudIntersection(
-				e.drag.end, 
-				e.viewer.scene.getActiveCamera(), 
-				e.viewer, 
-				e.viewer.scene.pointclouds,
-				{pickClipped: true});
+            if (I) {
+                this.sphere.position.copy(I.location);
+                annotation.position.copy(I.location);
+            }
+        };
 
-			if (I) {
-				this.s.position.copy(I.location);
+        let drop = (e) => {
+            this.viewer.scene.scene.remove(this.sphere);
+            annotation.installHandles(this.viewer);
+            this.sphere.removeEventListener("drag", drag);
+            this.sphere.removeEventListener("drop", drop);
+            this.viewer.scene.dispatchEvent({type: 'annotation_added', annotation: annotation});
+        };
 
-				annotation.position.copy(I.location);
-			}
-		};
+        this.sphere.addEventListener('drag', drag);
+        this.sphere.addEventListener('drop', drop);
 
-		let drop = (e) => {
-			viewer.scene.scene.remove(this.s);
-			this.s.removeEventListener("drag", drag);
-			this.s.removeEventListener("drop", drop);
-		};
-
-		this.s.addEventListener('drag', drag);
-		this.s.addEventListener('drop', drop);
-
-		this.viewer.scene.scene.add(this.s);
-		this.viewer.inputHandler.startDragging(this.s);
+        this.viewer.scene.scene.add(this.sphere);
+        this.viewer.inputHandler.startDragging(this.sphere);
 
 		return annotation;
 	}
-	
+
 	update(){
 		// let camera = this.viewer.scene.getActiveCamera();
 		// let domElement = this.renderer.domElement;

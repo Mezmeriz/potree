@@ -14,6 +14,10 @@ export class Annotation extends EventDispatcher {
 		this._description = args.description || '';
 		this.offset = new THREE.Vector3();
 		this.uuid = THREE.Math.generateUUID();
+		this.commentForm = null;
+		this.userName = args.userName;
+		this.submitCommentClicked = false;
+		this.inputDisabled = false;
 
 		if (!args.position) {
 			this.position = null;
@@ -34,6 +38,7 @@ export class Annotation extends EventDispatcher {
 		this.showDescription = true;
 		this.actions = args.actions || [];
 		this.isHighlighted = false;
+		this.clickedVisible = false;
 		this._visible = true;
 		this.__visible = true;
 		this._display = true;
@@ -44,31 +49,54 @@ export class Annotation extends EventDispatcher {
 		this.parent = null;
 		this.boundingBox = new THREE.Box3();
 
+		let annotationIcon = resourcePath + '/icons/annotation.svg';
 		let iconClose = resourcePath + '/icons/close.svg';
 
+		this.handleDomElement = null;
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
-				<div class="annotation-titlebar">
-					<span class="annotation-label"></span>
+				<div>
+					<span class="annotation-icon">
+						<img src="${annotationIcon}">
+					</span>
 				</div>
 				<div class="annotation-description">
 					<span class="annotation-description-close">
 						<img src="${iconClose}" width="16px">
 					</span>
-					<span class="annotation-description-content">${this._description}</span>
+					
+					<span class="annotation-description-minimize">&#8722;</span>
+					
+					<div class="annotation-titlebar">
+						<span class="annotation-label"></span>
+					</div> 
+					
+					<div class="annotation-description-content">${this._description}</div>
+					
+					<form id="comment-form">
+						<input type="text" placeholder="Title" name="title" id="title">
+						<textarea type="text" rows="4" cols="55" class="no-outline" name="description" id="input-description" placeholder="Enter Comment"></textarea>
+						<button id="submit-button" type="button" class="annotation-button">Submit</button>
+					</form>
 				</div>
 			</div>
 		`);
 
 		this.elTitlebar = this.domElement.find('.annotation-titlebar');
 		this.elTitle = this.elTitlebar.find('.annotation-label');
-		this.elTitle.append(this._title);
 		this.elDescription = this.domElement.find('.annotation-description');
-		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
-		// this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
+		this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
+		this.elClose = this.elDescription.find('.annotation-description-close');
+		this.elMinimize = this.elDescription.find('.annotation-description-minimize');
+		this.elTitle.append(this._title);
+		this.icon = this.domElement.find('.annotation-icon');
+		this.commentForm = this.domElement.find('comment-form');
+		this.titleInput = this.commentForm.find('title');
+		this.textArea = this.commentForm.find('description');
+		this.submitButton = this.domElement.find('#submit-button');
 
 		this.clickTitle = () => {
-			if(this.hasView()){
+			if (this.hasView()) {
 				this.moveHere(this.scene.getActiveCamera());
 			}
 			this.dispatchEvent({type: 'click', target: this});
@@ -76,44 +104,66 @@ export class Annotation extends EventDispatcher {
 
 		this.elTitle.click(this.clickTitle);
 
-		this.actions = this.actions.map(a => {
-			if (a instanceof Action) {
-				return a;
-			} else {
-				return new Action(a);
-			}
+		this.elClose.hover(
+			e => this.elClose.css('opacity', '1'),
+			e => this.elClose.css('opacity', '0.5')
+		)
+		this.elMinimize.hover(
+			e => this.elMinimize.css('opacity', '1'),
+			e => this.elMinimize.css('opacity', '0.5')
+		);
+
+		this.icon.click(
+			e => {
+				this.clickedVisible = !this.clickedVisible;
+				this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
+			});
+
+		this.elMinimize.click(e => {
+			this.clickedVisible = !this.clickedVisible;
+			this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
 		});
 
-		for (let action of this.actions) {
-			action.pairWith(this);
-		}
+		this.elClose.click(
+			e => {
+				this.domElement.remove();
+				this.removeHandles(this.handleDomElement);
+				this.scene.dispatchEvent({type: 'annotation_removed', uuid: this.uuid});
+				delete this;
+			}
+		)
 
-		let actions = this.actions.filter(
-			a => a.showIn === undefined || a.showIn.includes('scene'));
+		this.submitButton.click(
+			e => {
+				if(!this.submitCommentClicked){
+					this.elDescriptionContent.empty();
+					this.elTitle.empty();
+				}
 
-		for (let action of actions) {
-			let elButton = $(`<img src="${action.icon}" class="annotation-action-icon">`);
-			this.elTitlebar.append(elButton);
-			elButton.click(() => action.onclick({annotation: this}));
-		}
+				this.submitCommentClicked = true;
+				this.domElement.find('#title').attr('disabled', 'disabled')
+				// this.inputDisabled = true;
 
-		this.elDescriptionClose.hover(
-			e => this.elDescriptionClose.css('opacity', '1'),
-			e => this.elDescriptionClose.css('opacity', '0.5')
-		);
-		this.elDescriptionClose.click(e => this.setHighlighted(false));
-		// this.elDescriptionContent.html(this._description);
+				let title = this.domElement.find('#title').val();
+				let comment = this.domElement.find('#input-description').val();
 
-		this.domElement.mouseenter(e => this.setHighlighted(true));
-		this.domElement.mouseleave(e => this.setHighlighted(false));
+				this.elTitle.append(title);
+				this.elDescriptionContent.append(this.userName + " : " + comment + '\n' );
+
+				this.scene.dispatchEvent({
+					type: 'annotation_comment_added',
+					title: this.elTitle.text(),
+					annotation_thread: this.elDescriptionContent.text()});
+
+				this.domElement.find('#input-description').val('');
+			}
+		)
 
 		this.domElement.on('touchstart', e => {
 			this.setHighlighted(!this.isHighlighted);
 		});
 
 		this.display = false;
-		//this.display = true;
-
 	}
 
 	installHandles(viewer){
@@ -122,7 +172,7 @@ export class Annotation extends EventDispatcher {
 		}
 
 		let domElement = $(`
-			<div style="position: absolute; left: 300; top: 200; pointer-events: none">
+			<div style="position: absolute; left: 300%; top: 200%; pointer-events: none">
 				<svg width="300" height="600">
 					<line x1="0" y1="0" x2="1200" y2="200" style="stroke: black; stroke-width:2" />
 					<circle cx="50" cy="50" r="4" stroke="black" stroke-width="2" fill="gray" />
@@ -168,7 +218,10 @@ export class Annotation extends EventDispatcher {
 
 		};
 
+		this.handleDomElement = domElement;
+
 		$(viewer.renderArea).append(domElement);
+		$(viewer.renderArea).append(this.domElement);
 
 
 		let annotationStartPos = this.position.clone();
@@ -251,6 +304,14 @@ export class Annotation extends EventDispatcher {
 
 		};
 
+		this.scene.addEventListener( 'open_annotation',
+			e => {
+				if(e.uuid === this.uuid) {
+					this.clickedVisible = true;
+					this.setHighlighted(true);
+				}
+			});
+
 		viewer.addEventListener("update", updateCallback);
 
 		this.handles = {
@@ -264,11 +325,7 @@ export class Annotation extends EventDispatcher {
 		if(this.handles === undefined){
 			return;
 		}
-
-		//$(viewer.renderArea).remove(this.handles.domElement);
 		this.handles.domElement.remove();
-		viewer.removeEventListener("update", this.handles.updateCallback);
-
 		delete this.handles;
 	}
 
@@ -307,9 +364,15 @@ export class Annotation extends EventDispatcher {
 		if (display) {
 			// this.domElement.fadeIn(200);
 			this.domElement.show();
+			if(Boolean(this.handleDomElement)){
+				this.handleDomElement.show();
+			}
 		} else {
 			// this.domElement.fadeOut(200);
 			this.domElement.hide();
+			if(Boolean(this.handleDomElement)){
+				this.handleDomElement.hide();
+			}
 		}
 	}
 
@@ -495,8 +558,10 @@ export class Annotation extends EventDispatcher {
 			this.domElement.css('opacity', '0.5');
 			this.elTitlebar.css('box-shadow', '');
 			this.domElement.css('z-index', '100');
-			this.descriptionVisible = false;
-			this.elDescription.css('display', 'none');
+			if(!this.clickedVisible) {
+				this.descriptionVisible = false;
+				this.elDescription.css('display', 'none');
+			}
 		}
 
 		this.isHighlighted = highlighted;
