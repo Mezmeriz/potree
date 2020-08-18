@@ -57,26 +57,22 @@ export class Annotation extends EventDispatcher {
 			<div class="annotation" oncontextmenu="return false;">
 				<div>
 					<span class="annotation-icon">
-						<img src="${annotationIcon}">
+						<img src="${annotationIcon}" alt="AnnotationIcon">
 					</span>
 				</div>
 				<div class="annotation-description">
 					<span class="annotation-description-close">
-						<img src="${iconClose}" width="16px">
+						<img src="${iconClose}" width="16px" alt="CloseIcon">
 					</span>
-					
 					<span class="annotation-description-minimize">&#8722;</span>
-					
 					<div class="annotation-titlebar">
 						<span class="annotation-label"></span>
 					</div> 
-					
+					<br>
 					<div class="annotation-description-content">${this._description}</div>
-					
 					<form id="comment-form">
-						<input type="text" placeholder="Title" name="title" id="title">
-						<textarea type="text" rows="4" cols="55" class="no-outline" name="description" id="input-description" placeholder="Enter Comment"></textarea>
-						<button id="submit-button" type="button" class="annotation-button">Submit</button>
+						<textarea rows="4" cols="53" class="no-outline" name="description" id="input-description" placeholder="Write a Comment"></textarea>
+						<button id="submit-button" type="button" class="comment-button">Comment</button>
 					</form>
 				</div>
 			</div>
@@ -85,13 +81,12 @@ export class Annotation extends EventDispatcher {
 		this.elTitlebar = this.domElement.find('.annotation-titlebar');
 		this.elTitle = this.elTitlebar.find('.annotation-label');
 		this.elDescription = this.domElement.find('.annotation-description');
-		this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
+		this.elDescriptionContent = this.elDescription.find(".annotation-description-content").empty();
 		this.elClose = this.elDescription.find('.annotation-description-close');
 		this.elMinimize = this.elDescription.find('.annotation-description-minimize');
 		this.elTitle.append(this._title);
 		this.icon = this.domElement.find('.annotation-icon');
 		this.commentForm = this.domElement.find('comment-form');
-		this.titleInput = this.commentForm.find('title');
 		this.textArea = this.commentForm.find('description');
 		this.submitButton = this.domElement.find('#submit-button');
 
@@ -137,17 +132,11 @@ export class Annotation extends EventDispatcher {
 			e => {
 				if(!this.submitCommentClicked){
 					this.elDescriptionContent.empty();
-					this.elTitle.empty();
 				}
 
 				this.submitCommentClicked = true;
-				this.domElement.find('#title').attr('disabled', 'disabled')
-				// this.inputDisabled = true;
 
-				let title = this.domElement.find('#title').val();
 				let comment = this.domElement.find('#input-description').val();
-
-				this.elTitle.append(title);
 				this.elDescriptionContent.append(this.userName + " : " + comment + '\n' );
 
 				this.scene.dispatchEvent({
