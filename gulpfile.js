@@ -107,7 +107,7 @@ gulp.task("minify-worker", function () {
         .pipe(gulp.dest('build/resources/workers'));
 });
 
-gulp.task("minify", gulp.series("add-import-header", "minify-worker"));
+gulp.task("minify", gulp.series("add-import-header", "minify-potree", "minify-worker"));
 
 gulp.task('build',
     gulp.series(
