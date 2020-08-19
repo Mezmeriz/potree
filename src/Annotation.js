@@ -52,7 +52,7 @@ export class Annotation extends EventDispatcher {
 		let annotationIcon = resourcePath + '/icons/annotation.svg';
 		let iconClose = resourcePath + '/icons/close.svg';
 
-		this.handleDomElement = null;
+		this.leaderLineDomElement = null;
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
 				<div>
@@ -122,7 +122,7 @@ export class Annotation extends EventDispatcher {
 		this.elClose.click(
 			e => {
 				this.domElement.remove();
-				this.removeHandles(this.handleDomElement);
+				this.removeHandles(this.leaderLineDomElement);
 				this.scene.dispatchEvent({type: 'annotation_removed', uuid: this.uuid});
 				delete this;
 			}
@@ -207,7 +207,7 @@ export class Annotation extends EventDispatcher {
 
 		};
 
-		this.handleDomElement = domElement;
+		this.leaderLineDomElement = domElement;
 
 		$(viewer.renderArea).append(domElement);
 		$(viewer.renderArea).append(this.domElement);
@@ -353,14 +353,14 @@ export class Annotation extends EventDispatcher {
 		if (display) {
 			// this.domElement.fadeIn(200);
 			this.domElement.show();
-			if(Boolean(this.handleDomElement)){
-				this.handleDomElement.show();
+			if(this.leaderLineDomElement) {
+				this.leaderLineDomElement.show();
 			}
 		} else {
 			// this.domElement.fadeOut(200);
 			this.domElement.hide();
-			if(Boolean(this.handleDomElement)){
-				this.handleDomElement.hide();
+			if(this.leaderLineDomElement) {
+				this.leaderLineDomElement.hide();
 			}
 		}
 	}
