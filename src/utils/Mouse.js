@@ -1,6 +1,21 @@
-
 export class Mouse {
-    static getMousePointCloudIntersection (mouse, camera, viewer, pointclouds, params = {}) {
+
+    static getMouseAllIntersection(mouse, camera, viewer, pointclouds, photospheres, meshes, params = {}) {
+        const pointIntersection = Mouse.getMousePointCloudIntersection(mouse, camera, viewer, pointclouds, params);
+        const geometryIntersection = Mouse.getMouseGeometryIntersection(mouse, camera, viewer, photospheres.concat(meshes), params);
+
+        let ret = null;
+        if (Boolean(pointIntersection) && Boolean(geometryIntersection)) {
+            ret = pointIntersection.distance < geometryIntersection.distance ? pointIntersection : geometryIntersection;
+        } else if (Boolean(pointIntersection)) {
+            ret = pointIntersection;
+        } else if (Boolean(geometryIntersection)) {
+            ret = geometryIntersection;
+        }
+        return ret;
+    }
+
+    static getMousePointCloudIntersection(mouse, camera, viewer, pointclouds, params = {}) {
 
         let renderer = viewer.renderer;
 
@@ -76,6 +91,29 @@ export class Mouse {
         } else {
             return null;
         }
+    }
+
+    static getMouseGeometryIntersection(mouse, camera, viewer, geometries) {
+        geometries = geometries.map(geometry => geometry.model ? geometry.model : geometry)
+        const nmouse = {
+            x: (mouse.x / viewer.renderer.domElement.clientWidth) * 2 - 1,
+            y: -(mouse.y / viewer.renderer.domElement.clientHeight) * 2 + 1
+        };
+
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(nmouse, camera);
+        const intersects = raycaster.intersectObjects(geometries, true);
+
+        let ret = null;
+
+        if (intersects.length > 0) {
+            ret = {
+                location: intersects[0].point,
+                distance: camera.position.distanceTo(intersects[0].point),
+                uuid: intersects[0].object.uuid
+            }
+        }
+        return ret;
     }
 
 }
