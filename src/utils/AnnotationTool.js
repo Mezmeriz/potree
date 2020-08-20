@@ -60,7 +60,6 @@ export class AnnotationTool extends EventDispatcher {
                 e.viewer.scene.getActiveCamera(),
                 e.viewer,
                 e.viewer.scene.pointclouds,
-                e.viewer.scene.photoSpheres,
                 e.viewer.scene.geometries,
                 {pickClipped: true});
 

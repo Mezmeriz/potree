@@ -1,12 +1,18 @@
 export class Mouse {
 
-    static getMouseAllIntersection(mouse, camera, viewer, pointclouds, photospheres, meshes, params = {}) {
+    static getMouseAllIntersection(mouse, camera, viewer, pointclouds, geometries, params = {}) {
         const pointIntersection = Mouse.getMousePointCloudIntersection(mouse, camera, viewer, pointclouds, params);
-        const geometryIntersection = Mouse.getMouseGeometryIntersection(mouse, camera, viewer, photospheres.concat(meshes), params);
+        const geometryIntersection = Mouse.getMouseGeometryIntersection(mouse, camera, viewer, geometries, params);
 
         let ret = null;
         if (Boolean(pointIntersection) && Boolean(geometryIntersection)) {
-            ret = pointIntersection.distance < geometryIntersection.distance ? pointIntersection : geometryIntersection;
+            const distToCam = Math.min(pointIntersection.distance, geometryIntersection.distance);
+            const range = Math.sqrt(distToCam) / 100;
+            if (Math.abs(pointIntersection.rayDistance - geometryIntersection.rayDistance) < range) {
+                ret = pointIntersection.distance < geometryIntersection.distance ? pointIntersection : geometryIntersection;
+            } else {
+                ret = pointIntersection.rayDistance < geometryIntersection.rayDistance ? pointIntersection : geometryIntersection;
+            }
         } else if (Boolean(pointIntersection)) {
             ret = pointIntersection;
         } else if (Boolean(geometryIntersection)) {
@@ -41,6 +47,7 @@ export class Mouse {
         let closestDistance = Infinity;
         let closestIntersection = null;
         let closestPoint = null;
+        let rayDistance = null;
 
         for(let pointcloud of pointclouds){
             let point = pointcloud.pick(viewer, camera, ray, pickParams);
@@ -53,6 +60,7 @@ export class Mouse {
 
             if (distance < closestDistance) {
                 closestDistance = distance;
+                rayDistance = ray.distanceSqToPoint(point.position);
                 selectedPointcloud = pointcloud;
                 closestIntersection = point.position;
                 closestPoint = point;
@@ -64,7 +72,8 @@ export class Mouse {
                 location: closestIntersection,
                 distance: closestDistance,
                 pointcloud: selectedPointcloud,
-                point: closestPoint
+                point: closestPoint,
+                rayDistance: rayDistance
             };
         } else {
             return null;
@@ -94,10 +103,9 @@ export class Mouse {
     }
 
     static getMouseGeometryIntersection(mouse, camera, viewer, geometries) {
-        geometries = geometries.map(geometry => geometry.model ? geometry.model : geometry)
         const nmouse = {
             x: (mouse.x / viewer.renderer.domElement.clientWidth) * 2 - 1,
-            y: -(mouse.y / viewer.renderer.domElement.clientHeight) * 2 + 1
+            y: (-1) * (mouse.y / viewer.renderer.domElement.clientHeight) * 2 + 1
         };
 
         const raycaster = new THREE.Raycaster();
@@ -105,12 +113,23 @@ export class Mouse {
         const intersects = raycaster.intersectObjects(geometries, true);
 
         let ret = null;
-
         if (intersects.length > 0) {
+            const intersect = intersects.reduce((prevVal, currentVal) => {
+                const distToCam = Math.min(camera.position.distanceTo(prevVal.point), camera.position.distanceTo(currentVal.point));
+                const prevRayDist = raycaster.ray.distanceSqToPoint(prevVal.point);
+                const currRayDist = raycaster.ray.distanceSqToPoint(currentVal.point);
+                const range = Math.sqrt(distToCam) / 100;
+                let ret = prevRayDist < currRayDist ? prevVal : currentVal;
+                if (Math.abs(prevRayDist - currRayDist) < range) {
+                    ret = camera.position.distanceTo(prevVal.point) < camera.position.distanceTo(currentVal.point) ? prevVal : currentVal;
+                }
+                return ret;
+            });
             ret = {
-                location: intersects[0].point,
-                distance: camera.position.distanceTo(intersects[0].point),
-                uuid: intersects[0].object.uuid
+                location: intersect.point,
+                distance: camera.position.distanceTo(intersect.point),
+                rayDistance: raycaster.ray.distanceSqToPoint(intersect.point),
+                uuid: intersect.object.uuid
             }
         }
         return ret;
