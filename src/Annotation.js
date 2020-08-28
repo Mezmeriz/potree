@@ -142,7 +142,7 @@ export class Annotation extends EventDispatcher {
 				this.scene.dispatchEvent({
 					type: 'annotation_comment_added',
 					title: this.elTitle.text(),
-					annotation_thread: this.elDescriptionContent.text()});
+					text: this.elDescriptionContent.text()});
 
 				this.domElement.find('#input-description').val('');
 			}
