@@ -34,11 +34,9 @@ export class Annotation extends EventDispatcher {
 		this.radius = args.radius;
 		this.view = args.view || null;
 		this.keepOpen = false;
-		this.descriptionVisible = false;
 		this.showDescription = true;
 		this.actions = args.actions || [];
-		this.isHighlighted = false;
-		this.clickedVisible = false;
+		this.isOpen = false;
 		this._visible = true;
 		this.__visible = true;
 		this._display = true;
@@ -110,13 +108,11 @@ export class Annotation extends EventDispatcher {
 
 		this.icon.click(
 			e => {
-				this.clickedVisible = !this.clickedVisible;
-				this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
+				this.setOpenState(!this.isOpen);
 			});
 
 		this.elMinimize.click(e => {
-			this.clickedVisible = !this.clickedVisible;
-			this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
+			this.setOpenState(!this.isOpen);
 		});
 
 		this.elClose.click(
@@ -149,7 +145,7 @@ export class Annotation extends EventDispatcher {
 		)
 
 		this.domElement.on('touchstart', e => {
-			this.setHighlighted(!this.isHighlighted);
+			this.setOpenState(!isOpen);
 		});
 
 		this.display = false;
@@ -296,8 +292,7 @@ export class Annotation extends EventDispatcher {
 		this.scene.addEventListener( 'open_annotation',
 			e => {
 				if(e.uuid === this.uuid) {
-					this.clickedVisible = true;
-					this.setHighlighted(true);
+					this.setOpenState(true);
 				}
 			});
 
@@ -532,14 +527,13 @@ export class Annotation extends EventDispatcher {
 		return annotations;
 	}
 
-	setHighlighted (highlighted) {
-		if (highlighted) {
+	setOpenState (open) {
+		if (open) {
 			this.domElement.css('opacity', '0.8');
 			this.elTitlebar.css('box-shadow', '0 0 5px #fff');
 			this.domElement.css('z-index', '1000');
 
 			if (this._description) {
-				this.descriptionVisible = true;
 				this.elDescription.fadeIn(200);
 				this.elDescription.css('position', 'relative');
 			}
@@ -547,13 +541,10 @@ export class Annotation extends EventDispatcher {
 			this.domElement.css('opacity', '0.5');
 			this.elTitlebar.css('box-shadow', '');
 			this.domElement.css('z-index', '100');
-			if(!this.clickedVisible) {
-				this.descriptionVisible = false;
-				this.elDescription.css('display', 'none');
-			}
+			this.elDescription.css('display', 'none');
 		}
 
-		this.isHighlighted = highlighted;
+		this.isOpen= open;
 	}
 
 	hasView () {
