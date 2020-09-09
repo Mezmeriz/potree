@@ -89,8 +89,7 @@ export class Annotation extends EventDispatcher {
 
 		this.clickTitle = () => {
 			if (this.hasView()) {
-				this.moveHere(this.cameraPosition);
-				this.lookAt(this.position);
+				this.moveHere(this.scene.getActiveCamera());
 			}
 			this.dispatchEvent({type: 'click', target: this});
 		};
