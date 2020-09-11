@@ -1,6 +1,21 @@
-
 export class Mouse {
-    static getMousePointCloudIntersection (mouse, camera, viewer, pointclouds, params = {}) {
+
+    static getMouseAllIntersection(mouse, camera, viewer, pointclouds, geometries, params = {}) {
+        const pointIntersection = Mouse.getMousePointCloudIntersection(mouse, camera, viewer, pointclouds, params);
+        const geometryIntersection = Mouse.getMouseGeometryIntersection(mouse, camera, viewer, geometries, params);
+        let ret = null;
+        if (Boolean(pointIntersection) && Boolean(geometryIntersection)) {
+            ret = this.chooseIntersect(pointIntersection, geometryIntersection, pointIntersection.rayDistance,
+                geometryIntersection.rayDistance, pointIntersection.distance, geometryIntersection.distance);
+        } else if (Boolean(pointIntersection)) {
+            ret = pointIntersection;
+        } else if (Boolean(geometryIntersection)) {
+            ret = geometryIntersection;
+        }
+        return ret;
+    }
+
+    static getMousePointCloudIntersection(mouse, camera, viewer, pointclouds, params = {}) {
 
         let renderer = viewer.renderer;
 
@@ -26,6 +41,7 @@ export class Mouse {
         let closestDistance = Infinity;
         let closestIntersection = null;
         let closestPoint = null;
+        let rayDistance = null;
 
         for(let pointcloud of pointclouds){
             let point = pointcloud.pick(viewer, camera, ray, pickParams);
@@ -38,6 +54,7 @@ export class Mouse {
 
             if (distance < closestDistance) {
                 closestDistance = distance;
+                rayDistance = ray.distanceSqToPoint(point.position);
                 selectedPointcloud = pointcloud;
                 closestIntersection = point.position;
                 closestPoint = point;
@@ -49,7 +66,8 @@ export class Mouse {
                 location: closestIntersection,
                 distance: closestDistance,
                 pointcloud: selectedPointcloud,
-                point: closestPoint
+                point: closestPoint,
+                rayDistance: rayDistance
             };
         } else {
             return null;
@@ -76,6 +94,43 @@ export class Mouse {
         } else {
             return null;
         }
+    }
+
+    static getMouseGeometryIntersection(mouse, camera, viewer, geometries) {
+        const nmouse = {
+            x: (mouse.x / viewer.renderer.domElement.clientWidth) * 2 - 1,
+            y: (-1) * (mouse.y / viewer.renderer.domElement.clientHeight) * 2 + 1
+        };
+
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(nmouse, camera);
+        const intersects = raycaster.intersectObjects(geometries, true);
+
+        let ret = null;
+        if (intersects.length > 0) {
+            const intersect = intersects.reduce((prevVal, currentVal) => {
+                return this.chooseIntersect(prevVal, currentVal, raycaster.ray.distanceSqToPoint(prevVal.point),
+                    raycaster.ray.distanceSqToPoint(currentVal.point), camera.position.distanceTo(prevVal.point),
+                    camera.position.distanceTo(currentVal.point));
+            });
+            ret = {
+                location: intersect.point,
+                distance: camera.position.distanceTo(intersect.point),
+                rayDistance: raycaster.ray.distanceSqToPoint(intersect.point),
+                uuid: intersect.object.uuid
+            }
+        }
+        return ret;
+    }
+
+    static chooseIntersect(intersect1, intersect2, intersect1RayDist, intersect2RayDist, intersect1CamDist, intersect2CamDist) {
+        const distToCam = Math.min(intersect1CamDist, intersect2CamDist);
+        const range = Math.sqrt(distToCam) / 100;
+        let ret = intersect1RayDist < intersect2RayDist ? intersect1 : intersect2;
+        if (Math.abs(intersect1RayDist - intersect2RayDist) < range) {
+            ret = intersect1CamDist < intersect2CamDist ? intersect1 : intersect2;
+        }
+        return ret;
     }
 
 }

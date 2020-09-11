@@ -34,11 +34,9 @@ export class Annotation extends EventDispatcher {
 		this.radius = args.radius;
 		this.view = args.view || null;
 		this.keepOpen = false;
-		this.descriptionVisible = false;
 		this.showDescription = true;
 		this.actions = args.actions || [];
-		this.isHighlighted = false;
-		this.clickedVisible = false;
+		this.isOpen = false;
 		this._visible = true;
 		this.__visible = true;
 		this._display = true;
@@ -52,31 +50,27 @@ export class Annotation extends EventDispatcher {
 		let annotationIcon = resourcePath + '/icons/annotation.svg';
 		let iconClose = resourcePath + '/icons/close.svg';
 
-		this.handleDomElement = null;
+		this.leaderLineDomElement = null;
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
 				<div>
 					<span class="annotation-icon">
-						<img src="${annotationIcon}">
+						<img src="${annotationIcon}" alt="AnnotationIcon">
 					</span>
 				</div>
 				<div class="annotation-description">
 					<span class="annotation-description-close">
-						<img src="${iconClose}" width="16px">
+						<img src="${iconClose}" width="16px" alt="CloseIcon">
 					</span>
-					
 					<span class="annotation-description-minimize">&#8722;</span>
-					
 					<div class="annotation-titlebar">
 						<span class="annotation-label"></span>
 					</div> 
-					
+					<br>
 					<div class="annotation-description-content">${this._description}</div>
-					
-					<form id="comment-form">
-						<input type="text" placeholder="Title" name="title" id="title">
-						<textarea type="text" rows="4" cols="55" class="no-outline" name="description" id="input-description" placeholder="Enter Comment"></textarea>
-						<button id="submit-button" type="button" class="annotation-button">Submit</button>
+					<form class="comment-form">
+						<textarea rows="4" cols="53" class="no-outline input-description" name="description" placeholder="Write a Comment"></textarea>
+						<button type="button" class="comment-button">Comment</button>
 					</form>
 				</div>
 			</div>
@@ -90,10 +84,8 @@ export class Annotation extends EventDispatcher {
 		this.elMinimize = this.elDescription.find('.annotation-description-minimize');
 		this.elTitle.append(this._title);
 		this.icon = this.domElement.find('.annotation-icon');
-		this.commentForm = this.domElement.find('comment-form');
-		this.titleInput = this.commentForm.find('title');
-		this.textArea = this.commentForm.find('description');
-		this.submitButton = this.domElement.find('#submit-button');
+		this.commentForm = this.elDescription.find('.comment-form');
+		this.submitButton = this.commentForm.find('.comment-button');
 
 		this.clickTitle = () => {
 			if (this.hasView()) {
@@ -115,19 +107,17 @@ export class Annotation extends EventDispatcher {
 
 		this.icon.click(
 			e => {
-				this.clickedVisible = !this.clickedVisible;
-				this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
+				this.setOpenState(!this.isOpen);
 			});
 
 		this.elMinimize.click(e => {
-			this.clickedVisible = !this.clickedVisible;
-			this.clickedVisible ? this.setHighlighted(true) : this.setHighlighted(false);
+			this.setOpenState(!this.isOpen);
 		});
 
 		this.elClose.click(
 			e => {
 				this.domElement.remove();
-				this.removeHandles(this.handleDomElement);
+				this.removeHandles(this.leaderLineDomElement);
 				this.scene.dispatchEvent({type: 'annotation_removed', uuid: this.uuid});
 				delete this;
 			}
@@ -137,30 +127,26 @@ export class Annotation extends EventDispatcher {
 			e => {
 				if(!this.submitCommentClicked){
 					this.elDescriptionContent.empty();
-					this.elTitle.empty();
 				}
 
 				this.submitCommentClicked = true;
-				this.domElement.find('#title').attr('disabled', 'disabled')
-				// this.inputDisabled = true;
 
-				let title = this.domElement.find('#title').val();
-				let comment = this.domElement.find('#input-description').val();
-
-				this.elTitle.append(title);
+				let inputDescription = this.commentForm.find('.input-description');
+				let comment = inputDescription.val();
 				this.elDescriptionContent.append(this.userName + " : " + comment + '\n' );
 
 				this.scene.dispatchEvent({
 					type: 'annotation_comment_added',
+					uuid: this.uuid,
 					title: this.elTitle.text(),
-					annotation_thread: this.elDescriptionContent.text()});
+					text: comment});
 
-				this.domElement.find('#input-description').val('');
+				inputDescription.val('');
 			}
 		)
 
 		this.domElement.on('touchstart', e => {
-			this.setHighlighted(!this.isHighlighted);
+			this.setOpenState(!isOpen);
 		});
 
 		this.display = false;
@@ -218,7 +204,7 @@ export class Annotation extends EventDispatcher {
 
 		};
 
-		this.handleDomElement = domElement;
+		this.leaderLineDomElement = domElement;
 
 		$(viewer.renderArea).append(domElement);
 		$(viewer.renderArea).append(this.domElement);
@@ -307,8 +293,7 @@ export class Annotation extends EventDispatcher {
 		this.scene.addEventListener( 'open_annotation',
 			e => {
 				if(e.uuid === this.uuid) {
-					this.clickedVisible = true;
-					this.setHighlighted(true);
+					this.setOpenState(true);
 				}
 			});
 
@@ -364,14 +349,14 @@ export class Annotation extends EventDispatcher {
 		if (display) {
 			// this.domElement.fadeIn(200);
 			this.domElement.show();
-			if(Boolean(this.handleDomElement)){
-				this.handleDomElement.show();
+			if(this.leaderLineDomElement) {
+				this.leaderLineDomElement.show();
 			}
 		} else {
 			// this.domElement.fadeOut(200);
 			this.domElement.hide();
-			if(Boolean(this.handleDomElement)){
-				this.handleDomElement.hide();
+			if(this.leaderLineDomElement) {
+				this.leaderLineDomElement.hide();
 			}
 		}
 	}
@@ -543,14 +528,13 @@ export class Annotation extends EventDispatcher {
 		return annotations;
 	}
 
-	setHighlighted (highlighted) {
-		if (highlighted) {
+	setOpenState (open) {
+		if (open) {
 			this.domElement.css('opacity', '0.8');
 			this.elTitlebar.css('box-shadow', '0 0 5px #fff');
 			this.domElement.css('z-index', '1000');
 
 			if (this._description) {
-				this.descriptionVisible = true;
 				this.elDescription.fadeIn(200);
 				this.elDescription.css('position', 'relative');
 			}
@@ -558,13 +542,10 @@ export class Annotation extends EventDispatcher {
 			this.domElement.css('opacity', '0.5');
 			this.elTitlebar.css('box-shadow', '');
 			this.domElement.css('z-index', '100');
-			if(!this.clickedVisible) {
-				this.descriptionVisible = false;
-				this.elDescription.css('display', 'none');
-			}
+			this.elDescription.css('display', 'none');
 		}
 
-		this.isHighlighted = highlighted;
+		this.isOpen= open;
 	}
 
 	hasView () {

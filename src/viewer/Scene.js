@@ -27,6 +27,7 @@ export class Scene extends EventDispatcher{
 		this.overrideCamera = null;
 		this.pointclouds = [];
 		this.photoSpheres = [];
+		this.geometries = [];
 
 		this.measurements = [];
 		this.profiles = [];
@@ -192,6 +193,7 @@ export class Scene extends EventDispatcher{
 
 	addGeometry(geometry) {
 		geometry.material.transparent = true;
+		this.geometries.push(geometry);
 		this.scene.add(geometry);
 		this.dispatchEvent( {
 			type: 'geometry_added',

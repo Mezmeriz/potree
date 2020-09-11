@@ -97,7 +97,7 @@
 	margin: 5px;
 	border-radius: 4px;
 	color: var(--font-color);
-	font-family: Arial;
+	font-family: Arial, serif;
 	opacity: 0.8;
 	border: 1px solid black;
 	display: flex;
@@ -157,10 +157,10 @@
 #potree_render_area{
 	position: 	absolute;
 	/*background: linear-gradient(-90deg, red, yellow);*/
-	top: 		0px;
-	bottom: 	0px;
-	left: 		0px;
-	right: 		0px;
+	top: 		0;
+	bottom: 	0;
+	left: 		0;
+	right: 		0;
 	overflow: 	hidden;
 	z-index: 	1;
 	-webkit-transition: left .35s;
@@ -170,7 +170,7 @@
 .potree-panel {
 	border: 		1px solid black;
 	border-radius: 	0.4em;
-	padding: 		0px;
+	padding: 		0;
 	background-color: var(--bg-light-color);
 }
 
@@ -186,9 +186,9 @@ a:hover, a:visited, a:link, a:active{
 .annotation{
 	position:		absolute;
 	padding:		10px;
-	/*opacity:		0.5;*/
 	transform:		translate(-50%, -50px);
 	will-change:	left, top;
+	font-family: 	Arial, serif;
 }
 
 .annotation-titlebar{
@@ -197,7 +197,6 @@ a:hover, a:visited, a:link, a:active{
 	border-radius:	0.2em;
 	border:			1px solid rgba(255, 255, 255, 0.7);
 	font-size:		1em;
-	/*opacity:		1;*/
 	margin:			8px;
 	display:		table;
 	padding:		8px 8px;
@@ -207,7 +206,6 @@ a:hover, a:visited, a:link, a:active{
 .annotation-expand{
 	color:			white;
 	font-size:		0.6em;
-	/*opacity:		1;*/
 }
 
 .annotation-action-icon{
@@ -230,18 +228,16 @@ a:hover, a:visited, a:link, a:active{
 .annotation-item {
 	color:			white;
 	background-color: 	black;
-	/*opacity:		0.5;*/
 	border-radius:	1.5em;
 	font-size:		1em;
 	line-height:	1.5em;
-	padding:		1px 8px 0px 8px;
+	padding:		1px 8px 0 8px;
 	font-weight:	bold;
 	display:		flex;
 	cursor:			default;
 }
 
 .annotation-item:hover {
-	/*opacity:		1.0;*/
 	box-shadow:		0 0 5px #ffffff;
 }
 
@@ -259,7 +255,6 @@ a:hover, a:visited, a:link, a:active{
 	z-index:		100;
 	vertical-align:	middle;
 	line-height:	1.5em;
-	font-family:	Arial;
 	font-weight:	bold;
 	cursor: 		pointer;
 	white-space:	nowrap;
@@ -278,25 +273,10 @@ a:hover, a:visited, a:link, a:active{
 	width:			500px;
 }
 
-.annotation-description-minimize {
-	float:			right;
-	transform:		scale(1.4, 4);
-	margin:			0px 0px 8px 8px;
-	cursor: 		pointer;
-	opacity: 		0.2;
-}
-
-.annotation-description-close{
-	filter:			invert(100%);
-	float:			right;
-	margin:			0px 0px 8px 8px;
-	cursor: 		pointer;
-	opacity: 		0.2;
-}
-
 .annotation-description-content{
-	border: 1px solid ghostwhite;
-	border-radius: 0.3em;
+	border: 		1px solid ghostwhite;
+	border-radius: 	0.3em;
+	word-wrap: 		break-spaces;
 	overflow: 		auto;
 	color: 			white;
 	white-space: 	pre;
@@ -304,53 +284,54 @@ a:hover, a:visited, a:link, a:active{
 	user-select:	none;
 	-moz-user-select: none;
 	padding: 		10px;
-	height:         100px;
+	height:         150px;
 	max-height:     200px;
 }
 
-.annotation-icon{
+.annotation-description-minimize {
+	float:			right;
+	transform:		scale(1.4, 4);
+	margin:			0 0 8px 8px;
+	cursor: 		pointer;
+	opacity: 		0.2;
+}
+
+.annotation-description-close{
+	filter:			invert(100%);
+	float:			right;
+	margin:			0 0 8px 8px;
+	cursor: 		pointer;
+	opacity: 		0.2;
+}
+
+.annotation-icon {
 	width:		20px;
 	height:		20px;
 	margin:		2px 2px;
 }
 
-.annotation-button{
-	border: none;
+.comment-button {
+	border: 		none;
 	background-color: white;
-	color: black;
-	font-weight: bold;
-	padding: 4px 10px;
-	text-align: center;
+	color: 			black;
+	font-weight: 	bold;
+	padding: 		4px 10px;
+	text-align: 	center;
 	text-decoration: none;
-	/*display: */
-	position: relative;
-	margin: 10px 2px;
+	position: 		relative;
+	margin: 		10px 2px;
 	transition-duration: 0.6s;
-	cursor: pointer;
+	cursor: 		pointer;
 }
 
 .annotation-button:hover{
 	background-color: #e72599;
-	color: white;
-}
-
-.input {
-	border-top-style: hidden;
-	border-right-style: hidden;
-	border-left-style: hidden;
-	border-bottom-style: groove;
-	background-color: black;
-	color: white;
+	color: 			white;
 }
 
 form {
-	padding-top: 10px;
+	padding-top: 	10px;
 	padding-bottom: 10px;
-}
-
-.dash{
-	border: 1px solid ghostwhite;
-	height: 0px;
 }
 
 .no-outline{
@@ -363,7 +344,6 @@ form {
 
 pre {
 	overflow: auto;
-	/*white-space: pre-wrap;*/
 }
 
 canvas { 

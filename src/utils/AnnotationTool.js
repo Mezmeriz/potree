@@ -16,13 +16,12 @@ export class AnnotationTool extends EventDispatcher {
    }
 
 
-    startInsertion(args = {}) {
+    startInsertion(userName) {
         let domElement = this.viewer.renderer.domElement;
-        let userName = args["userName"];
-        console.log("here is the User Name from front: " + userName)
         let annotation = new Annotation({
             position: [-0.7, 6, 7],
-            title: "Annotation Title",
+            //TODO - connect the title to the category node
+            title: "New Annotation",
             description: `Annotation Description`,
             userName: userName
         });
@@ -56,11 +55,12 @@ export class AnnotationTool extends EventDispatcher {
         domElement.addEventListener('mouseup', insertionCallback, true);
 
         let drag = (e) => {
-            let I = Mouse.getMousePointCloudIntersection(
+            let I = Mouse.getMouseAllIntersection(
                 e.drag.end,
                 e.viewer.scene.getActiveCamera(),
                 e.viewer,
                 e.viewer.scene.pointclouds,
+                e.viewer.scene.geometries,
                 {pickClipped: true});
 
             if (I) {
