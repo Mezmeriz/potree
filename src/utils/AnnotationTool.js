@@ -21,7 +21,7 @@ export class AnnotationTool extends EventDispatcher {
         let annotation = new Annotation({
             position: [-0.7, 6, 7],
             //TODO - connect the title to the category node
-            title: "New Annotation",
+            title: "Category: Points",
             description: `Annotation Description`,
             userName: userName
         });
