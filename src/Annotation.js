@@ -68,9 +68,9 @@ export class Annotation extends EventDispatcher {
 					</div> 
 					<br>
 					<div class="annotation-description-content">${this._description}</div>
-					<form class="comment-form">
-						<textarea rows="4" cols="53" class="no-outline input-description" name="description" placeholder="Write a Comment"></textarea>
-						<button type="button" class="comment-button">Comment</button>
+					<form id="comment-form">
+						<textarea rows="4" cols="53" class="no-outline" name="description" id="input-description" placeholder="Write a Comment"></textarea>
+						<button id="submit-button" type="button" class="comment-button">Comment</button>
 					</form>
 				</div>
 			</div>
@@ -79,13 +79,14 @@ export class Annotation extends EventDispatcher {
 		this.elTitlebar = this.domElement.find('.annotation-titlebar');
 		this.elTitle = this.elTitlebar.find('.annotation-label');
 		this.elDescription = this.domElement.find('.annotation-description');
-		this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
+		this.elDescriptionContent = this.elDescription.find(".annotation-description-content").empty();
 		this.elClose = this.elDescription.find('.annotation-description-close');
 		this.elMinimize = this.elDescription.find('.annotation-description-minimize');
 		this.elTitle.append(this._title);
 		this.icon = this.domElement.find('.annotation-icon');
-		this.commentForm = this.elDescription.find('.comment-form');
-		this.submitButton = this.commentForm.find('.comment-button');
+		this.commentForm = this.domElement.find('comment-form');
+		this.textArea = this.commentForm.find('description');
+		this.submitButton = this.domElement.find('#submit-button');
 
 		this.clickTitle = () => {
 			if (this.hasView()) {
@@ -131,17 +132,15 @@ export class Annotation extends EventDispatcher {
 
 				this.submitCommentClicked = true;
 
-				let inputDescription = this.commentForm.find('.input-description');
-				let comment = inputDescription.val();
+				let comment = this.domElement.find('#input-description').val();
 				this.elDescriptionContent.append(this.userName + " : " + comment + '\n' );
 
 				this.scene.dispatchEvent({
 					type: 'annotation_comment_added',
-					uuid: this.uuid,
 					title: this.elTitle.text(),
-					text: comment});
+					text: this.elDescriptionContent.text()});
 
-				inputDescription.val('');
+				this.domElement.find('#input-description').val('');
 			}
 		)
 

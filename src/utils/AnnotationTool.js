@@ -20,8 +20,6 @@ export class AnnotationTool extends EventDispatcher {
         let domElement = this.viewer.renderer.domElement;
         let annotation = new Annotation({
             position: [-0.7, 6, 7],
-            //TODO - connect the title to the category node
-            title: "New Annotation",
             description: `Annotation Description`,
             userName: userName
         });
