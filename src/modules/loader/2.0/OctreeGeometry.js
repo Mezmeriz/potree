@@ -1,3 +1,4 @@
+import {nodes} from "../../../Nodes";
 
 export class OctreeGeometry{
 
@@ -69,7 +70,7 @@ export class OctreeGeometryNode{
 
 	load(){
 
-		if (Potree.numNodesLoading >= Potree.maxNodesLoading) {
+		if (nodes.nodesLoading >= nodes.maxNodesLoading) {
 			return;
 		}
 
