@@ -138,8 +138,8 @@ export function loadPointCloudData(path, name, httpClient, callback){
 					aPosition.range[1][2],
 				];
 
-				// loaded(pointcloud);
-				resolve({type: 'pointcloud_loaded', pointcloud: pointcloud});
+				loaded(pointcloud);
+				// resolve({type: 'pointcloud_loaded', pointcloud: pointcloud});
 			}
 		});
 	} else {
