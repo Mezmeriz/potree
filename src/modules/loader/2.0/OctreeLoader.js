@@ -2,7 +2,7 @@
 import {PointAttribute, PointAttributes, PointAttributeTypes} from "../../../loader/PointAttributes.js";
 import {OctreeGeometry, OctreeGeometryNode} from "./OctreeGeometry.js";
 import {nodes} from "../../../Nodes";
-import {scriptPath, workerPool} from "../../../Potree";
+import {resourcePath, scriptPath, workerPool} from "../../../Potree";
 
 // let loadedNodes = new Set();
 
@@ -59,9 +59,9 @@ export class NodeLoader{
 
 			let workerPath;
 			if(this.metadata.encoding === "BROTLI"){
-				workerPath = scriptPath + '/workers/2.0/DecoderWorker_brotli.js';
+				workerPath = resourcePath + '/workers/2.0/DecoderWorker_brotli.js';
 			}else{
-				workerPath = scriptPath + '/workers/2.0/DecoderWorker.js';
+				workerPath = resourcePath + '/workers/2.0/DecoderWorker.js';
 			}
 
 			let worker = workerPool.getWorker(workerPath);
