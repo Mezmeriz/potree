@@ -16,5 +16,21 @@ export default [
 			name: 'Potree',
 			sourcemap: false
 		}
+	},{
+		input: 'src/modules/loader/2.0/DecoderWorker.js',
+		output: {
+			file: 'build/resources/workers/2.0/DecoderWorker.js',
+			format: 'es',
+			name: 'Potree',
+			sourcemap: false
+		}
+	},{
+		input: 'src/modules/loader/2.0/DecoderWorker_brotli.js',
+		output: {
+			file: 'build/resources/workers/2.0/DecoderWorker_brotli.js',
+			format: 'es',
+			name: 'Potree',
+			sourcemap: false
+		}
 	}
 ]
